@@ -17,8 +17,8 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: Library
-          key: Library-Windows-${{ hashFiles('Assets/**','Packages/**','ProjectSettings/**') }}
+          path: ProjectWP/Library
+          key: Library-Windows-${{ hashFiles('ProjectWP/Assets/**','ProjectWP/Packages/**','ProjectWP/ProjectSettings/**') }}
           restore-keys: |
             Library-Windows-
             Library-
