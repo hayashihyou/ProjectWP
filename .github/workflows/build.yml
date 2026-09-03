@@ -29,9 +29,8 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          projectPath: ProjectWP
           targetPlatform: StandaloneWindows64
-          # projectPath: UnityProject   # サブフォルダ構成のときだけ
-          # unityVersion: auto          # 既定。ProjectVersion.txt から自動判定
           versioning: Semantic
 
       - uses: actions/upload-artifact@v4
