@@ -30,7 +30,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: StandaloneWindows64
-          # projectPath: UnityProject   # サブフォルダ構成のときだけ
+          projectPath: ProjectWP
           # unityVersion: auto          # 既定。ProjectVersion.txt から自動判定
           versioning: Semantic
 
