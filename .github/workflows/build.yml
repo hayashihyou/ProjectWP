@@ -1,59 +1,71 @@
 name: Build
 
 on:
-  workflow_dispatch:        # Actions タブから手動で実行
-  # push:                   # 慣れてきたら開放する
+  workflow_dispatch:          # Actions タブから手動で実行
+  # push:                     # 慣れてきたら開放する
   #   branches: [ main ]
+  #   paths-ignore:
+  #     - '**.md'
 
 jobs:
   build:
     name: Build ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false        # 1つ落ちても他は続行
+      fail-fast: false
       matrix:
         targetPlatform:
           - StandaloneWindows64
           - Android
+
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0, lfs: true }
+        with:
+          fetch-depth: 0
+          lfs: true
 
       - uses: actions/cache@v4
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**','Packages/**','ProjectSettings/**') }}
-          restore-keys: Library-${{ matrix.targetPlatform }}-
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
 
-      - name: Free disk space (Android only)
+      - name: Free disk space
         if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@main
 
-      - uses: game-ci/unity-builder@v4
+      - name: Build Windows
+        if: matrix.targetPlatform == 'StandaloneWindows64'
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: StandaloneWindows64
           versioning: Semantic
+
+      - name: Build Android
+        if: matrix.targetPlatform == 'Android'
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: Android
+          versioning: Semantic
+          androidExportType: androidPackage      # apk。aab なら androidAppBundle
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
 
       - uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
           retention-days: 7
-          
-      - name: Notify failure
-        if: failure()
-        run: |
-          curl -X POST -H "Content-Type: application/json" \
-            -d "{\"content\": \"❌ ビルド失敗 / ${{ github.workflow }} / ${{ github.actor }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
-
-      - name: Notify success
-        if: success()
-        run: |
-          curl -X POST -H "Content-Type: application/json" \
-            -d "{\"content\": \"✅ ビルド成功 / ${{ github.workflow }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
