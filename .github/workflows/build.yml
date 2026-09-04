@@ -1,9 +1,12 @@
 name: Build
 
 on:
-  workflow_dispatch:          # Actions タブから手動で実行
-  # push:                     # 慣れてきたら開放する
-  #   branches: [ main ]
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:            # ドキュメントだけの変更では回さない
+      - '**.md'
+      - 'docs/**'
 
 jobs:
   build:
