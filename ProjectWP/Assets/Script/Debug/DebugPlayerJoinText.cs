@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class DebugPlayerJoinText : MonoBehaviour
 {
     // インスペクター上で割り当てられるようにする
@@ -35,7 +36,7 @@ public class DebugPlayerJoinText : MonoBehaviour
         // playerIndexは0から始まる番号なので、+1して1Pの表記に合わせる
         int playerNumber = playerInput.playerIndex + 1;
         // 参加ログに、新しい行として追加
-        joinLog.AppendLine($"｛playerNumber｝P参加");
+        joinLog.AppendLine($"{playerNumber}P参加");
 
         // テキストが割り当てられていれば、画面表示を更新
         if (joinText != null) { joinText.text = joinLog.ToString(); }
