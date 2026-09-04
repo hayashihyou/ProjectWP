@@ -40,11 +40,11 @@ jobs:
 
       - name: Pack (Windows)
         if: matrix.targetPlatform == 'StandaloneWindows64'
-        run: cd build && zip -r ../ProjectKMP-Windows.zip StandaloneWindows64
+        run: cd build && zip -r ../ProjectWP-Windows.zip StandaloneWindows64
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            ProjectKMP-Windows.zip
+            ProjectWP-Windows.zip
             build/Android/*.apk
           generate_release_notes: true
