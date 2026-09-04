@@ -68,6 +68,17 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
 
+      - name: Build OSX
+        if: matrix.targetPlatform == 'StandaloneOSX'
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneOSX
+          versioning: Tag
+
       - name: Archive (OSX)
         if: matrix.targetPlatform == 'StandaloneOSX'
         run: tar -czf StandaloneOSX.tar.gz -C build StandaloneOSX
