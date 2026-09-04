@@ -18,6 +18,7 @@ jobs:
         targetPlatform:
           - StandaloneWindows64
           - Android
+          - StandaloneOSX
 
     steps:
       - uses: actions/checkout@v4
@@ -67,8 +68,12 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
 
+      - name: Archive (OSX)
+        if: matrix.targetPlatform == 'StandaloneOSX'
+        run: tar -czf StandaloneOSX.tar.gz -C build StandaloneOSX
+
       - uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
+          name: Build-StandaloneOSX
+          path: StandaloneOSX.tar.gz
           retention-days: 7
