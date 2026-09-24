@@ -22,8 +22,9 @@ public class GameStartButton : MonoBehaviour
 {
     [SerializeField] private Button startButton;
 
-    // 遷移先のシーン名。今はまだ中身が無いプレースホルダーのシーン。
-    private const string NextSceneName = "03_StageSelect";
+    // 遷移先のシーン名。移動の動作確認用に、一時的にTest_Playerへ飛ばしている。
+    // 本来は "03_StageSelect"(まだ中身が無いプレースホルダーのシーン)に戻す。
+    private const string NextSceneName = "Test_Player";
 
     private const string HostLabelText = "ゲームスタート";
     private const string WaitingForHostLabelText = "ホストの開始を待っています...";
