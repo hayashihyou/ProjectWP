@@ -139,7 +139,17 @@ public class PlayerCharacterVisual : NetworkBehaviour
             return;
         }
 
-        animator.Play(spawnReactionAnimations[index]);
+        // Animator Controller側にそのステートが無い場合(コントローラーが差し替えられた、
+        // 名前が変わった等)にPlayを呼ぶと、警告が出て何も再生されない。
+        // その場合はIdleにフォールバックする。
+        string stateName = spawnReactionAnimations[index];
+        if (!animator.HasState(0, Animator.StringToHash(stateName)))
+        {
+            animator.Play("Idle");
+            return;
+        }
+
+        animator.Play(stateName);
     }
 
     /// <summary>

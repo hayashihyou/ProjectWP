@@ -36,9 +36,23 @@ public class PlayerMovement : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
         animator = GetComponentInChildren<Animator>();
-        // 移動入力アクションの取得
+
+        if(Camera.main != null)
+        {
+            mainCameraTransform = Camera.main.transform;
+        }
+    }
+
+    // 移動入力アクションはAwakeではなくOnEnableで取得する。
+    // オンラインでは、PlayerInputが有効化された後(=自分専用の入力設定が
+    // 作られた後)に、このコンポーネントが有効化されるため。
+    // Awakeで取ると、有効化前の共有アクションを掴んでしまい入力が読めない。
+    private void OnEnable()
+    {
         moveAction = playerInput.actions["Move"];
 
+        // オンラインではキャラクターが別のシーンで作られ、その後シーンをまたいで使われるため、
+        // Awakeで掴んだカメラは既に無くなっている。有効になるたびに取り直す。
         if(Camera.main != null)
         {
             mainCameraTransform = Camera.main.transform;
