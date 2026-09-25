@@ -11,6 +11,17 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TestScene.unity
     guid: c380322091f102546b645f3219ffb40b
+    path: Assets/Scenes/01_Title.unity
+    guid: d5a064e78369f0447a1301fc82dd88e4
+  - enabled: 1
+    path: Assets/Scenes/02_PlayerJoin.unity
+    guid: 878bad26cf999ff46a97ddaa5c323646
+  - enabled: 1
+    path: Assets/Scenes/03_StageSelect.unity
+    guid: 0ffc7d406bc135941852d02dfde5c5a0
+  - enabled: 1
+    path: Assets/Scenes/Test_Player.unity
+    guid: 9fdc8444271d62d4795aee14a93fa46a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
