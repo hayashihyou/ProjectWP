@@ -142,10 +142,6 @@ public class PlayerOwnerControl : NetworkBehaviour
         lastEvaluatedSceneName = sceneName;
         bool movementAllowed = isLocallyControlled && !IsMovementDisabledInScene(sceneName);
 
-        string localId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId.ToString() : "offline";
-        Debug.Log($"[PlayerOwnerControl] thisPC={localId} owner={(IsSpawned ? OwnerClientId.ToString() : "-")} " +
-            $"locallyControlled={isLocallyControlled} scene={sceneName} movementAllowed={movementAllowed}");
-
         if (movementAllowed)
         {
             // 順番が大事: PlayerMovementは有効になる時にPlayerInputの入力設定を取りに行くので、

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
@@ -6,13 +6,10 @@ public class Connectionapprovalhandler : MonoBehaviour
 {
     // 最大同時接続人数
     [SerializeField] private int maxTotalPlayers = 4;
-    // 現在接続している人数
-    private int currentTotalPlayers = 0;
 
-    // 誰(ClientNetworkId)が何人分の枠を使っているかを覚えておく。
-    // 切断時にこれを見て、その分だけcurrentTotalPlayersを正しく減らすため
-    // (減らさないと、抜けた分の枠がいつまでも埋まったまま扱われてしまう)。
-    private readonly Dictionary<ulong, int> localPlayerCountByClient = new Dictionary<ulong, int>();
+    // 参加を承認済みの人(ClientNetworkId)。切断時にここから外して、抜けた分の枠を空ける。
+    // (承認して人数に数えた人だけを外すため、断った人の切断では減らない)
+    private readonly HashSet<ulong> approvedClients = new HashSet<ulong>();
 
     private NetworkManager networkManager;
 
@@ -47,39 +44,24 @@ public class Connectionapprovalhandler : MonoBehaviour
         NetworkManager.ConnectionApprovalResponse response
         )
     {
-        // クライアントが送ってきたPayLoadから「そのPCの参加希望人数」を取り出す
-        int requestedLocalPlayers = 1;
-        if (request.Payload != null && request.Payload.Length >= 4) 
-        {
-            requestedLocalPlayers = System.BitConverter.ToInt32(request.Payload, 0);
-        }
-
         // 上限チェック
-        if(currentTotalPlayers + requestedLocalPlayers > maxTotalPlayers)
+        if (approvedClients.Count >= maxTotalPlayers)
         {
             response.Approved = false;      // 承認しない
             response.Reason = "満員です";   // 警告ログ
             return;
         }
 
-        // 1台のPCからゲームパッド2本で同時に2人参加するケースに対応するため、++にしない
-        currentTotalPlayers += requestedLocalPlayers;
-        // このクライアントが何人分の枠を使ったかを覚えておく(切断時に減らす分)
-        localPlayerCountByClient[request.ClientNetworkId] = requestedLocalPlayers;
+        approvedClients.Add(request.ClientNetworkId);
 
         response.Approved = true;               // 許可する
-        response.CreatePlayerObject = true;    // 自動でプレイヤーを作らないで
+        response.CreatePlayerObject = true;    // 接続した人ごとにプレイヤーオブジェクトを自動で作る
         response.Pending = false;               // 結果の確定
     }
 
     // クライアントが切断したとき(NetworkManagerが自動で呼ぶ)。
-    // 承認時に記録しておいた人数分だけ、使用中人数を正しく戻す。
     private void HandleClientDisconnected(ulong clientId)
     {
-        if (localPlayerCountByClient.TryGetValue(clientId, out int localPlayerCount))
-        {
-            currentTotalPlayers -= localPlayerCount;
-            localPlayerCountByClient.Remove(clientId);
-        }
+        approvedClients.Remove(clientId);
     }
 }
