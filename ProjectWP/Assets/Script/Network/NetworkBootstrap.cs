@@ -23,8 +23,8 @@ using UnityEngine.SceneManagement;
 /// - 「どのサーバー(部屋)を選ぶか」というUI/一覧表示は ServerListUI が担当する
 ///   (ServerListUIがLobbyサービスを使って部屋を探し/作り、参加コードのやり取りだけ
 ///    このクラスに任せる、という役割分担)
-/// - 繋がった後、「その端末のどの入力デバイス(キーボード/ゲームパッド)が
-///   どのキャラクターを操作するか」は PlayerInputManager / LocalPlayerInputHandler が別途担当する
+/// - 繋がった後の、キャラクターの生成は ClientSessionHandler、
+///   「誰がどのキャラクターを操作するか」は PlayerOwnerControl が別途担当する
 /// 役割をあえて分けることで、後から機能を足しても混ざって複雑にならないようにしている。
 /// </summary>
 public class NetworkBootstrap : MonoBehaviour
@@ -42,9 +42,7 @@ public class NetworkBootstrap : MonoBehaviour
     // 1部屋あたりの人数上限(ホスト込み)。ServerListUI側でLobbyのmaxPlayersに使う。
     public int MaxPlayersPerRoom => maxConnections + 1;
 
-    // 接続後に移動する先のシーン名。
-    // (PlayerInputManagerがこのシーンにいるので、そこに移らないと
-    //  キーボード/ゲームパッドでの「参加」が試せない)
+    // 接続後に移動する先のシーン名(待機画面)。
     private const string PlayerJoinSceneName = "02_PlayerJoin";
 
     // 2重サインインを防ぐためのフラグ
