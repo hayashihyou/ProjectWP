@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -8,7 +9,6 @@ using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 「インターネット越しにPC同士を繋げる」ところだけを担当するクラス。
@@ -42,9 +42,6 @@ public class NetworkBootstrap : MonoBehaviour
     // 1部屋あたりの人数上限(ホスト込み)。ServerListUI側でLobbyのmaxPlayersに使う。
     public int MaxPlayersPerRoom => maxConnections + 1;
 
-    // 接続後に移動する先のシーン名(待機画面)。
-    private const string PlayerJoinSceneName = "02_PlayerJoin";
-
     // 2重サインインを防ぐためのフラグ
     private bool isSigningIn;
 
@@ -52,6 +49,10 @@ public class NetworkBootstrap : MonoBehaviour
     // ホストでなければnullのまま。
     private string hostedLobbyId;
     private bool heartbeatRunning;
+
+    // 参加者として入ったLobbyのID。抜けるときに、Lobbyの参加人数から自分を外すために使う。
+    // (外さないと、サーバー一覧の「X/4」に抜けた人が数えられたまま残ってしまう)
+    private string joinedLobbyId;
 
     // Lobbyは一定時間(既定30秒)ハートビートが無いと自動的に消えてしまう。
     // それより短い間隔で送り続ける。
@@ -65,6 +66,10 @@ public class NetworkBootstrap : MonoBehaviour
     private void OnDestroy()
     {
         heartbeatRunning = false;
+
+        // タイトルに戻るときはNetworkManagerごと(=このコンポーネントも)作り直すので、
+        // 古い自分を指したままにならないようにする
+        if (Instance == this) Instance = null;
     }
 
     private async void Start()
@@ -150,7 +155,10 @@ public class NetworkBootstrap : MonoBehaviour
         // 参加コードを手入力していた頃はホストが「コードが見える画面」に
         // 留まる必要があったが、Lobby一覧からの自動参加に変えたので、
         // 今はもうその必要が無い。ホストになったら即座に待機画面へ進む。
-        NetworkManager.Singleton.SceneManager.LoadScene(PlayerJoinSceneName, LoadSceneMode.Single);
+        // 接続後の遷移は、全員の画面でフェードをそろえるために NetworkSceneTransition を通す。
+        // (この時点ではホスト1人なので、実際にはホスト自身のフェードだけが動く)
+        // 遷移の完了は待たなくてよいので、Forget()で投げっぱなしにする。
+        NetworkSceneTransition.Instance.LoadSceneForAllAsync(SceneNames.PlayerJoin).Forget();
 
         SetStatus("ホストとして開始しました。");
     }
@@ -240,6 +248,60 @@ public class NetworkBootstrap : MonoBehaviour
                 // ハートビート1回の失敗くらいでは進行を止めない(ログだけ残す)
                 Debug.LogWarning($"[NetworkBootstrap] Lobby heartbeat failed: {e.Message}");
             }
+        }
+    }
+
+    /// <summary>
+    /// 参加者として入ったLobbyのIDを覚えておく(ServerListUIがLobbyに参加した直後に呼ぶ)。
+    /// </summary>
+    public void RegisterJoinedLobby(string lobbyId)
+    {
+        joinedLobbyId = lobbyId;
+    }
+
+    // ============================== 抜ける ==============================
+
+    /// <summary>
+    /// 今の部屋から抜ける。Lobbyの後始末をしてから、ネットワークを切断(Shutdown)する。
+    ///   ホスト  : Lobbyを削除する(サーバー一覧から消え、新しい人が入ってこなくなる)。
+    ///            切断すると、参加者も全員切断される(=部屋の解散)。
+    ///   参加者  : Lobbyから自分だけを外す(サーバー一覧の人数が1人減る)。
+    /// Lobbyの後始末に失敗しても(通信エラー、ホストが先にLobbyを消していた等)、切断は必ず行う。
+    /// 切断しないまま01_Titleに戻ると、次にサーバーを選んだときに「既に動いている」状態のまま
+    /// もう一度ホストやクライアントを始めようとしてしまう。
+    /// </summary>
+    public async Task LeaveSessionAsync()
+    {
+        // ハートビートを止める(削除したLobbyに送り続けないように)
+        heartbeatRunning = false;
+
+        string lobbyToDelete = hostedLobbyId;
+        string lobbyToLeave = joinedLobbyId;
+        hostedLobbyId = null;
+        joinedLobbyId = null;
+
+        try
+        {
+            if (lobbyToDelete != null)
+            {
+                await Unity.Services.Lobbies.LobbyService.Instance.DeleteLobbyAsync(lobbyToDelete);
+            }
+            else if (lobbyToLeave != null)
+            {
+                await Unity.Services.Lobbies.LobbyService.Instance.RemovePlayerAsync(
+                    lobbyToLeave, AuthenticationService.Instance.PlayerId);
+            }
+        }
+        catch (Exception e)
+        {
+            // ホストが先に解散してLobbyが消えていた場合などに起きる。切断は続けて行う。
+            Debug.LogWarning($"[NetworkBootstrap] Lobbyの後始末に失敗しました(切断は続けます): {e.Message}");
+        }
+
+        NetworkManager networkManager = NetworkManager.Singleton;
+        if (networkManager != null && networkManager.IsListening)
+        {
+            networkManager.Shutdown();
         }
     }
 

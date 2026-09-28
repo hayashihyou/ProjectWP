@@ -33,7 +33,7 @@ public class PlayerCharacterVisual : NetworkBehaviour
     // 非表示判定になってしまい、その間Rendererが無効化されることでAnimatorの
     // 更新が止まってしまう(カリング設定の影響)。そのため「隠したいシーンの時だけ隠す」
     // 判定にして、それ以外(01_Titleを含む)は常に表示したままにしている。
-    private const string HiddenInSceneName = "03_StageSelect";
+    private const string HiddenInSceneName = SceneNames.StageSelect;
 
     [Header("スポーン時に再生するアニメーション")]
     [Tooltip("この中から1つ選んで再生する。Animator Controller側のステート名と完全に一致させること。" +
