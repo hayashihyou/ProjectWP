@@ -1,8 +1,8 @@
+using Cysharp.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -22,9 +22,8 @@ public class GameStartButton : MonoBehaviour
 {
     [SerializeField] private Button startButton;
 
-    // 遷移先のシーン名。移動の動作確認用に、一時的にTest_Playerへ飛ばしている。
-    // 本来は "03_StageSelect"(まだ中身が無いプレースホルダーのシーン)に戻す。
-    private const string NextSceneName = "Test_Player";
+    // 次に遷移するシーンの名前
+    private const string NextSceneName = SceneNames.StageSelect;
 
     private const string HostLabelText = "ゲームスタート";
     private const string WaitingForHostLabelText = "ホストの開始を待っています...";
@@ -61,6 +60,8 @@ public class GameStartButton : MonoBehaviour
 
     private void OnStartButtonClicked()
     {
-        NetworkManager.Singleton.SceneManager.LoadScene(NextSceneName, LoadSceneMode.Single);
+        // 全員の画面でフェードをそろえて遷移する(ホスト以外が呼んだ場合は、NetworkSceneTransition側で無視される)。
+        // 遷移中にもう一度押されても、NetworkSceneTransition側で多重起動を防いでいる。
+        NetworkSceneTransition.Instance.LoadSceneForAllAsync(NextSceneName).Forget();
     }
 }

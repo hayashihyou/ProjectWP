@@ -251,6 +251,9 @@ public class ServerListUI : MonoBehaviour
         // Lobbyに参加する(これで「参加人数」に自分がカウントされるようになる)
         Lobby lobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
 
+        // 抜けるとき(タイトルに戻るとき)にLobbyから自分を外せるよう、IDを覚えておいてもらう
+        NetworkBootstrap.Instance.RegisterJoinedLobby(lobby.Id);
+
         // Lobbyに保存されている参加コードを取り出して、それでRelayに接続する
         if (lobby.Data == null || !lobby.Data.TryGetValue(RelayJoinCodeKey, out DataObject joinCodeData))
         {
