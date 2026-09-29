@@ -27,13 +27,11 @@ using Unity.Netcode;
 /// </summary>
 public class PlayerOwnerControl : NetworkBehaviour
 {
-    [Header("移動できないシーン名(自分のキャラクターでも止める)")]
-    [SerializeField]
     private string[] movementDisabledScenes =
     {
-        "01_Title",
-        "02_PlayerJoin",
-        "03_StageSelect",
+        SceneNames.Title,
+        SceneNames.PlayerJoin,
+        SceneNames.StageSelect,
     };
 
     // PlayerMovementが「走っているか」を書き込むAnimatorのパラメータ名(PlayerMovement.csと同じ名前にすること)
