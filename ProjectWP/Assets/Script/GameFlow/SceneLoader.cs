@@ -39,7 +39,7 @@ public class SceneLoader : MonoBehaviour
             if (_instance != null) return _instance;
 
             // シーン内に既に置かれていないか探す
-            _instance = FindObjectOfType<SceneLoader>();
+            _instance = FindFirstObjectByType<SceneLoader>();
             if (_instance != null)
             {
                 DontDestroyOnLoad(_instance.gameObject);
