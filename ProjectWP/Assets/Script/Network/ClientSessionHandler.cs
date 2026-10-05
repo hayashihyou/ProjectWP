@@ -14,6 +14,38 @@ public class ClientSessionHandler : NetworkBehaviour
         // 作ってしまえば、参加ボタンを押さなくても自動的に全員分作られる。
         if (!IsServer) return;
 
+        // ホスト自身のキャラクターは、同期を待つ必要が無いので今すぐ作る
+        if (OwnerClientId == NetworkManager.ServerClientId)
+        {
+            SpawnCharacter();
+            return;
+        }
+
+        // 参加者のキャラクターは、その参加者の「同期」が終わってから作る。
+        // この時点の参加者は、まだ「今あるオブジェクト一覧」を受け取る前の途中の状態。
+        // ここでキャラクターを作ると、そのキャラクターが「一覧の中」と「新しく作った通知」の
+        // 2回届いてしまい、参加者の画面で
+        //   "Trying to spawn a NetworkObject but an object with that NetworkObjectId is already in the spawned list"
+        //   "[Size mismatch] Expected: 51 Currently At: 0"
+        // のエラーになる(枠の番号などが正しく届かない原因にもなる)。
+        NetworkManager.SceneManager.OnSynchronizeComplete += OnClientSynchronizeComplete;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // 同期が終わる前に抜けた場合などに、登録したままにならないようにする
+        if (NetworkManager != null && NetworkManager.SceneManager != null)
+        {
+            NetworkManager.SceneManager.OnSynchronizeComplete -= OnClientSynchronizeComplete;
+        }
+    }
+
+    private void OnClientSynchronizeComplete(ulong clientId)
+    {
+        // 他の参加者の同期完了も届くので、自分の持ち主(=このキャラクターを作る相手)の分だけ反応する
+        if (clientId != OwnerClientId) return;
+
+        NetworkManager.SceneManager.OnSynchronizeComplete -= OnClientSynchronizeComplete;
         SpawnCharacter();
     }
 

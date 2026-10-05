@@ -39,11 +39,15 @@ public class NetworkBootstrap : MonoBehaviour
     [Tooltip("ホスト自身を除く、Relayの部屋に入れる最大人数。ここが実質の「1部屋あたりの人数上限-1」になる")]
     [SerializeField] private int maxConnections = 3;
 
+    // Relayサーバーの場所。asia-northeast1 = 東京。
+    private const string RelayRegion = "asia-northeast1";
+
     // 1部屋あたりの人数上限(ホスト込み)。ServerListUI側でLobbyのmaxPlayersに使う。
     public int MaxPlayersPerRoom => maxConnections + 1;
 
-    // 2重サインインを防ぐためのフラグ
-    private bool isSigningIn;
+    // 実行中(または完了済み)のサインイン処理。
+    // 同時に何度呼ばれても、全員が同じこの処理の完了を待つようにする(2重サインインも防げる)。
+    private Task signInTask;
 
     // 自分がホストとして作ったLobbyのID。ハートビート(生存通知)を送り続けるために使う。
     // ホストでなければnullのまま。
@@ -81,12 +85,26 @@ public class NetworkBootstrap : MonoBehaviour
     /// <summary>
     /// Unity Gaming Servicesの初期化 + 匿名サインインを行う。
     /// すでにサインイン済みなら何もしない。
+    ///
+    /// サインイン中にもう一度呼ばれた場合は、すぐに戻らず、実行中のサインインが終わるまで待つ。
+    /// (すぐに戻ってしまうと、まだサインインしていないままLobbyに問い合わせてしまい、
+    ///  「401 Unauthorized」(ログインしていない)のエラーになる。
+    ///  起動直後にすぐサーバー一覧を開いたときに起きていた)
     /// </summary>
-    public async Task EnsureSignedInAsync()
+    public Task EnsureSignedInAsync()
     {
-        if (isSigningIn) return;
-        isSigningIn = true;
+        // まだ一度も始めていない、または前回失敗した場合だけ、新しくサインインを始める。
+        // (失敗したままにすると、二度とサインインし直せなくなるため)
+        if (signInTask == null || signInTask.IsFaulted || signInTask.IsCanceled)
+        {
+            signInTask = SignInAsync();
+        }
 
+        return signInTask;
+    }
+
+    private async Task SignInAsync()
+    {
         SetStatus("サインイン中...");
 
         // UnityServices自体がまだ初期化されていなければ初期化する。
@@ -94,7 +112,18 @@ public class NetworkBootstrap : MonoBehaviour
         // 完了する前にアクセスすると例外を投げる。なので必ずこちらを先に済ませる。
         if (UnityServices.State != ServicesInitializationState.Initialized)
         {
-            await UnityServices.InitializeAsync();
+            var options = new InitializationOptions();
+
+            // プロフィールを指定すると、ログイン情報の保存場所がプロフィールごとに分かれ、
+            // 別のプレイヤーとしてログインされる(PlayerIdが変わる)。
+            string profile = GetAuthenticationProfile();
+            if (profile != null)
+            {
+                options.SetProfile(profile);
+                Debug.Log($"[NetworkBootstrap] Authenticationのプロフィール: {profile}");
+            }
+
+            await UnityServices.InitializeAsync(options);
         }
 
         if (!AuthenticationService.Instance.IsSignedIn)
@@ -106,7 +135,38 @@ public class NetworkBootstrap : MonoBehaviour
         // サインイン完了は画面には表示しない(タイトル画面が煩雑になるため)。
         // ログにだけ残しておく。
         Debug.Log($"[NetworkBootstrap] Signed in. PlayerId: {AuthenticationService.Instance.PlayerId}");
-        isSigningIn = false;
+    }
+
+    /// <summary>
+    /// Multiplayer Play Modeで、ウィンドウごとに使うプロフィール名を返す。
+    ///
+    /// 匿名ログインのIDは、PCに保存された前回のログイン情報から決まる。
+    /// Multiplayer Play Modeのウィンドウは全員同じPCの同じ保存場所を見るので、
+    /// 何もしないと全員が同じPlayerIdになり、Lobbyから同じ1人に見えてしまう
+    /// (人数表示がずれる、回数制限の429エラーが出る、など)。
+    ///
+    ///   メインエディタ     → "Player1"
+    ///   追加のエディタ     → Play Mode Scenarioで付けたタグ("Player2"〜"Player4")
+    ///   ビルドしたゲーム   → null(プロフィールを分けない。今まで通り)
+    /// </summary>
+    private static string GetAuthenticationProfile()
+    {
+#if UNITY_EDITOR
+        if (Unity.Multiplayer.PlayMode.CurrentPlayer.IsMainEditor)
+        {
+            return "Player1";
+        }
+
+        // 追加のエディタは、タグのうち "Player" で始まるものをプロフィール名に使う
+        foreach (string tag in Unity.Multiplayer.PlayMode.CurrentPlayer.Tags)
+        {
+            if (tag.StartsWith("Player")) return tag;
+        }
+
+        Debug.LogWarning("[NetworkBootstrap] 追加のエディタに \"Player2\"〜\"Player4\" のタグが付いていません。" +
+            "Play Mode Scenarioでタグを付けないと、メインエディタと同じPlayerIdになります。");
+#endif
+        return null;
     }
 
     // ============================== ホスト側 ==============================
@@ -125,7 +185,12 @@ public class NetworkBootstrap : MonoBehaviour
 
         // Relayサーバー上に部屋を確保してもらう。
         // maxConnectionsは「自分以外」が入れる最大人数。
-        Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
+        // 場所(リージョン)は東京に決め打ちしている(遊ぶのは日本国内の想定)。
+        // 指定しないと、Relayが「一番近いサーバー」を測る処理(QosJob)を裏のスレッドで動かし、
+        // そのログがMultiplayer Play Modeの追加のエディタで
+        // "GetBool can only be called from the main thread" のエラーになってしまう。
+        // 指定すれば測る処理自体が動かないので、ホストの開始も少し速くなる。
+        Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections, RelayRegion);
 
         // 他の人に伝えるための短い参加コードを発行してもらう
         string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
