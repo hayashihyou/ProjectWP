@@ -47,6 +47,8 @@ jobs:
         with:
           projectPath: ProjectWP
           targetPlatform: StandaloneWindows64
+          projectPath: ProjectWP
+          # unityVersion: auto          # 既定。ProjectVersion.txt から自動判定
           versioning: Semantic
 
       - name: Build Android
