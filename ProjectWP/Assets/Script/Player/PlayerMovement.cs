@@ -26,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 moveInput; // 入力された移動方向
     private float verticalVelocity; // 重力によって落ちていく速さ
+    private bool isMovementLocked; // 移動をロックするかどうか
 
     private static readonly int RunningHash = Animator.StringToHash("IsRunning"); // アニメーションのSpeedパラメータのハッシュ値
 
@@ -76,6 +77,11 @@ public class PlayerMovement : MonoBehaviour
     {
         //方向ベクトルを取得
         moveInput = moveAction.ReadValue<Vector2>();
+    }
+
+    public void SetMovementLocked(bool locked)
+    {
+        isMovementLocked = locked;
     }
 
     // 入力に応じてキャラクターを回転させる
