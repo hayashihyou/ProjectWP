@@ -20,6 +20,15 @@ public class PlayerSpawnPoints : MonoBehaviour
 
     private void Start()
     {
+        PlaceAllPlayers();
+    }
+
+    /// <summary>
+    /// 全員のキャラクターを、枠の番号(1P〜4P)と同じ番号の初期位置に並べる。
+    /// シーン開始時のほか、ミニゲームのラウンドのリセット(MinigameBase)からも呼ばれる。
+    /// </summary>
+    public void PlaceAllPlayers()
+    {
         // ネットワークに繋がっていない(シーン単体で試している)場合や、参加者側のPCでは何もしない
         NetworkManager networkManager = NetworkManager.Singleton;
         if (networkManager == null || !networkManager.IsServer) return;
