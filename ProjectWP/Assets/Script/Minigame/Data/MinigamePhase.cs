@@ -8,11 +8,14 @@
 public enum MinigamePhase : byte
 {
     WaitingForPlayers,    // 全員のシーン読み込み完了待ち
-    Intro,                // イントロ演出
+    Intro,                // イントロ演出(最初の1回のみ)
+    // --------- ラウンド制の場合、ここからループ --------------
+    RoundIntro,           // ラウンド開始時の演出
     Countdown,            // カウントダウン中
     Playing,              // プレイ中(全員が操作可能なのはここだけ)
     RoundEnd,             // ラウンド終了演出中
     RoundReset,           // 次のラウンドの準備中
+    // -------- ラウンド制の場合、ここまでループ --------------
     GameEnd,              // ゲーム終了演出
     Result                // 結果表示中
 }
