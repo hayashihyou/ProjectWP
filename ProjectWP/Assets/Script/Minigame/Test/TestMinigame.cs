@@ -1,14 +1,45 @@
 using UnityEngine;
 
 /// <summary>
-/// 基盤の動作確認用ミニゲーム
+/// 基盤の動作確認用ミニゲーム(ルール側)。画面の表示は TestMinigameInfoDisplay が MinigameInfo だけを使って行う
 /// </summary>
 public class TestMinigame : MinigameBase
 {
-    // 確認用：画面の左上に、ラウンド・フェーズ・残り時間を表示する
-    private void OnGUI()
+    [Header("確認用")]
+    [Tooltip("今回の値がこれ以上になった人を「このラウンドを終えた」にする。0 = しない(終了条件「全員が終えた」の確認用)")]
+    [SerializeField] private float finishAtValue = 0f;
+
+    // 確認用: 値を足す間隔(秒)
+    private const float AddInterval = 1f;
+
+    // 確認用: 次に値を足すまでの時間(サーバーだけが使う)
+    private float addTimer;
+
+    // 確認用: プレイ中、1秒ごとに「枠番号 + 1」点ずつ足す(1Pは+1, 2Pは+2 …)。人ごとに違う値になるので同期を確かめやすい
+    protected override void OnServerPlayUpdate(float deltaTime)
     {
-        GUI.Label(new Rect(10, 10, 600, 40), $"ラウンド: {CurrentRound}/{TotalRounds}   フェーズ: {Phase}   残り: {RemainingTime:0.0}秒");
+        addTimer += deltaTime;
+        if (addTimer < AddInterval) { return; }
+        addTimer -= AddInterval;
+
+        for (int i = 0; i < PlayerCount; i++)
+        {
+            MinigamePlayerState player = GetPlayer(i);
+            if (player.IsFinished) { continue; } // 終えた人の値は止める
+
+            int slot = player.SlotIndex;
+            ServerAddValue(slot, slot + 1);
+
+            if (finishAtValue > 0f && GetPlayer(i).RoundValue >= finishAtValue)
+            {
+                ServerSetFinished(slot);
+            }
+        }
+    }
+
+    // 確認用: ラウンドの始めにタイマーを戻す
+    protected override void OnServerRoundStart(int round)
+    {
+        addTimer = 0f;
     }
 }
-
