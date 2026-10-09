@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 確認用の UI。MinigameInfo だけを使って(Netcode を一切使わずに)情報を表示し、イベントをログに出す。
@@ -41,6 +42,21 @@ public class TestMinigameInfoDisplay : MonoBehaviour
     private void HandleGameFinished(IReadOnlyList<MinigameRankEntry> result) => Debug.Log($"[UI] ゲーム終了。1位は {result[0].SlotIndex + 1}P");
     private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
         => Debug.Log($"[UI] 独自の出来事: {eventName}  値: {value}" + (slot >= 0 ? $"  ({slot + 1}P)" : ""));
+
+    // 確認用: スペースキーで「Stop」を送る(操作してよいときだけ)
+    private void Update()
+    {
+        if (Keyboard.current == null) { return; }
+
+        if (!Keyboard.current.spaceKey.wasPressedThisFrame) { return; }
+
+        // 押したことと、今送れる状態かを必ずログに出す(届かないときの切り分け用)
+        Debug.Log($"[UI] スペースが押された  フェーズ: {MinigameInfo.Phase}  操作できる: {MinigameInfo.CanControl}");
+        if (MinigameInfo.CanControl)
+        {
+            MinigameInfo.SendAction("Stop");
+        }
+    }
 
     // 今の値(プロパティ)は、毎フレーム読んで表示する
     private void OnGUI()

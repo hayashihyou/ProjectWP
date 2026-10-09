@@ -38,6 +38,17 @@ public class TestMinigame : MinigameBase
         }
     }
 
+    // 確認用: 「Stop」が届いたら、その人を「終えた」にして、押したタイミング(プレイ開始からの秒数)を出来事で知らせる
+    protected override void OnServerPlayerAction(int slot, string actionName, MinigameValue value, double pressedServerTime)
+    {
+        if (actionName != "Stop") { return; }
+
+        float elapsed = (float)(pressedServerTime - ServerRoundStartTime);
+        Debug.Log($"[TestMinigame] {slot + 1}P が {elapsed:0.00}秒 で Stop");
+        ServerSetFinished(slot);
+        ServerSendEvent("ストップ", elapsed, slot);
+    }
+
     // 確認用: ラウンドの始めにタイマーを戻し、独自の情報と出来事を送る
     protected override void OnServerRoundStart(int round)
     {

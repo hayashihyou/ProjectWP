@@ -87,6 +87,9 @@ public abstract class MinigameBase : NetworkBehaviour
     // 独自の情報(名前と値の組)。サーバーだけが書き換え、全員に同期される。例: 「目標時間」= 10
     private readonly NetworkList<MinigameCustomInfo> customInfos = new NetworkList<MinigameCustomInfo>();
 
+    // 今のラウンドのプレイが始まったサーバー時刻(サーバーだけが使う)。行動の「押した時刻」の確認と、経過時間の計算に使う
+    private double roundStartServerTime;
+
     // 「準備ができた」が届いた人のID(サーバーだけが使う)
     private readonly HashSet<ulong> readyClientIds = new HashSet<ulong>();
 
@@ -472,7 +475,8 @@ public abstract class MinigameBase : NetworkBehaviour
         {
             roundEndServerTime.Value = -1;
         }
-        // フェーズをプレイ中に
+        // フェーズをプレイ中に(始まった時刻を覚えておく)
+        roundStartServerTime = NetworkManager.ServerTime.Time;
         ServerSetPhase(MinigamePhase.Playing);
     }
 
@@ -683,6 +687,59 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
 
+    // ---------- 行動の送信(端末 → サーバー) ----------
+
+    /// <summary>
+    /// 自分(この端末)の行動をサーバーに送る(どの端末からでも呼べる)。例: SendAction("Stop")。
+    /// 押した瞬間のサーバー時刻は自動で付ける。プレイ中以外の行動と、脱落した人の行動はサーバーで無視される。
+    /// UI や入力のスクリプトからは MinigameInfo.SendAction で呼べる
+    /// </summary>
+    public void SendAction(string actionName, MinigameValue value = default)
+    {
+        if (!IsSpawned)
+        {
+            Debug.LogWarning("[MinigameBase] ミニゲームが始まっていないので、行動を送れません");
+            return;
+        }
+
+        PlayerActionRpc(new FixedString64Bytes(actionName), value, NetworkManager.ServerTime.Time);
+    }
+
+    // 行動を受け取る(サーバーで実行)。誰が送ったかは送信元のIDで決める(引数で「何P」を送らせないので、なりすましができない)
+    [Rpc(SendTo.Server)]
+    private void PlayerActionRpc(FixedString64Bytes actionName, MinigameValue value, double pressedServerTime, RpcParams rpcParams = default)
+    {
+        // プレイ中以外の操作は無視する
+        if (Phase != MinigamePhase.Playing) { return; }
+
+        // 送ってきた端末のプレイヤーを探す
+        ulong senderId = rpcParams.Receive.SenderClientId;
+        int index = -1;
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].ClientId == senderId && !players[i].IsCpu)
+            {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0) { return; }
+
+        // 抜けた人・脱落した人の操作は無視する
+        MinigamePlayerState player = players[index];
+        if (!player.IsConnected || player.IsEliminated) { return; }
+
+        // 押した時刻は端末から届く値なので、おかしな値にならないよう「プレイ開始 〜 今」の範囲に収める
+        double now = NetworkManager.ServerTime.Time;
+        pressedServerTime = Math.Clamp(pressedServerTime, roundStartServerTime, now);
+
+        OnServerPlayerAction(player.SlotIndex, actionName.ToString(), value, pressedServerTime);
+    }
+
+    /// <summary>今のラウンドのプレイが始まったサーバー時刻(サーバーのみ)。経過時間 = pressedServerTime - ServerRoundStartTime</summary>
+    protected double ServerRoundStartTime => roundStartServerTime;
+
+
     // ---------- ミニゲーム担当者が書く場所(すべて任意。上書きしたいものだけ override する) ----------
     // 名前が OnServer で始まるものは、サーバーでだけ呼ばれる
 
@@ -700,6 +757,13 @@ public abstract class MinigameBase : NetworkBehaviour
 
     /// <summary>次のラウンドの前に呼ばれる。ミニゲーム独自のリセットを書く(サーバーのみ)。キャラクターの位置は基盤が戻す</summary>
     protected virtual void OnServerRoundReset(int nextRound) { }
+
+    /// <summary>
+    /// 誰かが行動した(SendAction が届いた)ときに呼ばれる(サーバーのみ)。プレイ中・脱落していない人の行動だけが届く。
+    /// pressedServerTime = 押した瞬間のサーバー時刻(通信の遅れを含まないので、タイミングを公平に比べられる)。
+    /// CPU の行動は、サーバーからこれを直接呼んでもよい
+    /// </summary>
+    protected virtual void OnServerPlayerAction(int slot, string actionName, MinigameValue value, double pressedServerTime) { }
 
     // ネットワークに出てきたとき、全員の端末で呼ばれる。フェーズの変化を見張り始め、「準備できた」を送る
     public override void OnNetworkSpawn()

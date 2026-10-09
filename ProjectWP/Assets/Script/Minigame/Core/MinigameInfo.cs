@@ -5,6 +5,7 @@ using Unity.Netcode;
 /// <summary>
 /// UI・演出担当のための、ミニゲームの情報の窓口(各端末で使う)。
 /// Netcode を知らなくても、ここのプロパティを読む・イベントを購読するだけで必要な情報が取れる。
+/// 入力のスクリプトは SendAction で、自分の行動(ボタンを押した など)をサーバーに送れる。
 ///
 /// ・今の値(プロパティ)… いつ読んでも最新の値が返る。毎フレーム読んでよい
 /// ・出来事(イベント)  … 「今起きた」という合図。演出やエフェクトのきっかけに使う。後から購読しても過去の分は来ない
@@ -131,6 +132,23 @@ public static class MinigameInfo
     {
         value = default;
         return IsActive && current.TryGetInfo(infoName, out value);
+    }
+
+
+    // ==================== 行動を送る(この端末 → サーバー) ====================
+
+    /// <summary>
+    /// 自分(この端末)の行動をサーバーに送る。例: ボタンが押されたら MinigameInfo.SendAction("Stop")。
+    /// 押した瞬間の時刻は自動で付く。プレイ中以外・脱落した人の行動はサーバーで無視される(CanControl で事前に確かめられる)
+    /// </summary>
+    public static void SendAction(string actionName, MinigameValue value = default)
+    {
+        if (!IsActive)
+        {
+            UnityEngine.Debug.LogWarning("[MinigameInfo] ミニゲームが動いていないので、行動を送れません");
+            return;
+        }
+        current.SendAction(actionName, value);
     }
 
 
