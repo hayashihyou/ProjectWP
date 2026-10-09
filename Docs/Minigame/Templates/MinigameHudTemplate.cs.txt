@@ -1,0 +1,93 @@
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+/// <summary>
+/// ★1 この UI の説明(例: ストップウォッチの画面表示)
+/// MinigameInfo を読むだけなので、Netcode は使わない。シーンのどこに置いてもよい
+/// </summary>
+public class MinigameHudTemplate : MonoBehaviour // ★2 クラス名を変える(ファイル名と同じにする)
+{
+    // ===== ★3 表示に使う UI(インスペクターでドラッグして設定する。使わないものは空欄でよい) =====
+    [SerializeField] private TMP_Text remainingTimeText; // 残り時間
+    [SerializeField] private TMP_Text countdownText;     // 3, 2, 1, スタート！
+    [SerializeField] private TMP_Text myValueText;       // 自分の値
+    [SerializeField] private TMP_Text infoText;          // 独自の情報(例: 目標時間)
+    [SerializeField] private TMP_Text messageText;       // 出来事のお知らせ(例: 「2P ストップ！」)
+
+    // ----- 出来事(イベント)は OnEnable で登録し、OnDisable で外す -----
+    private void OnEnable()
+    {
+        MinigameInfo.OnCountdown += HandleCountdown;
+        MinigameInfo.OnPlayerValueChanged += HandlePlayerValueChanged;
+        MinigameInfo.OnCustomEvent += HandleCustomEvent;
+        MinigameInfo.OnGameFinished += HandleGameFinished;
+    }
+
+    private void OnDisable()
+    {
+        MinigameInfo.OnCountdown -= HandleCountdown;
+        MinigameInfo.OnPlayerValueChanged -= HandlePlayerValueChanged;
+        MinigameInfo.OnCustomEvent -= HandleCustomEvent;
+        MinigameInfo.OnGameFinished -= HandleGameFinished;
+    }
+
+    // ----- 今の値(プロパティ)は、毎フレーム読んで表示する -----
+    private void Update()
+    {
+        if (!MinigameInfo.IsActive) { return; }
+
+        // ★4 残り時間(制限なしのときは -1)
+        if (remainingTimeText != null)
+        {
+            float remaining = MinigameInfo.RemainingTime;
+            remainingTimeText.text = remaining >= 0 ? remaining.ToString("0") : "";
+        }
+
+        // ★5 自分の値(「12点」「0.35秒」のように、設定の形式・単位で整形される)
+        if (myValueText != null && MinigameInfo.TryGetLocalPlayer(out MinigamePlayerState me))
+        {
+            myValueText.text = MinigameInfo.FormatValue(me.TotalValue);
+        }
+
+        // ★6 独自の情報(担当者が ServerSetInfo で送ったもの。名前は担当者と合わせる)
+        if (infoText != null && MinigameInfo.TryGetInfo("目標時間", out MinigameValue target))
+        {
+            infoText.text = $"{target.FloatValue:0.00}秒で止めろ！";
+        }
+    }
+
+    // ★7 カウントダウン(3, 2, 1, 0 = スタート！)
+    private void HandleCountdown(int secondsLeft)
+    {
+        if (countdownText == null) { return; }
+        countdownText.text = secondsLeft > 0 ? secondsLeft.ToString() : "スタート！";
+    }
+
+    // ★8 誰かの値が変わった(枠番号, 変化量, 新しい値)。例: 「+3点」のアニメーション
+    private void HandlePlayerValueChanged(int slot, float delta, float newValue)
+    {
+        if (messageText == null) { return; }
+        messageText.text = $"{slot + 1}P {delta:+0;-0}";
+    }
+
+    // ★9 独自の出来事(名前, 値, 誰の出来事か。誰のものでもなければ -1)。名前は担当者と合わせる
+    private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
+    {
+        if (messageText == null) { return; }
+
+        switch (eventName)
+        {
+            case "ストップ":
+                messageText.text = $"{slot + 1}P ストップ！ {value.FloatValue:0.00}秒";
+                break;
+        }
+    }
+
+    // ★10 ゲームが終わって結果が届いた(順位の良い順に並んでいる)
+    private void HandleGameFinished(IReadOnlyList<MinigameRankEntry> result)
+    {
+        if (messageText == null) { return; }
+        messageText.text = $"1位は {result[0].SlotIndex + 1}P！";
+    }
+}

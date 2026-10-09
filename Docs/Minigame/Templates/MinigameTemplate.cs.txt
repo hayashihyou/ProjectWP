@@ -1,0 +1,72 @@
+using UnityEngine;
+
+/// <summary>
+/// ★1 このミニゲームの説明を1〜2行で書く(例: 目標の秒数ぴったりで止める。誤差が小さいほど勝ち)
+/// </summary>
+public class MinigameTemplate : MinigameBase // ★2 クラス名を変える(ファイル名と同じにする)
+{
+    // ===== ★3 このミニゲームだけの設定(インスペクターで変えたい値) =====
+    [Header("このミニゲームの設定")]
+    [Tooltip("例: 止める目標の秒数")]
+    [SerializeField] private float targetSeconds = 10f;
+
+    // ===== ★4 このミニゲームだけの変数(サーバーだけが使う) =====
+    private float playTimer;
+
+
+    // ----------------------------------------------------------------------
+    // ここから下は「使うものだけ残す」。使わないメソッドは丸ごと消してよい
+    // どれもサーバー(ホスト)でだけ呼ばれる
+    // ----------------------------------------------------------------------
+
+    // ★5 全員そろった直後に1回だけ呼ばれる。ゲーム全体の準備を書く
+    protected override void OnServerGameSetup()
+    {
+        // 例: 全員に見せたい情報を送る
+        ServerSetInfo("目標時間", targetSeconds);
+    }
+
+    // ★6 各ラウンドのプレイが始まったとき(カウントダウンの後)に呼ばれる
+    protected override void OnServerRoundStart(int round)
+    {
+        playTimer = 0f;
+    }
+
+    // ★7 プレイ中、毎フレーム呼ばれる。時間で何かを起こしたいときに書く
+    protected override void OnServerPlayUpdate(float deltaTime)
+    {
+        playTimer += deltaTime;
+    }
+
+    // ★8 プレイヤーが行動した(SendAction が届いた)ときに呼ばれる。ボタンの判定はここに書く
+    protected override void OnServerPlayerAction(int slot, string actionName, MinigameValue value, double pressedServerTime)
+    {
+        if (actionName != "Stop") { return; } // ★9 行動の名前(入力側の SendAction と同じ文字にする)
+        if (TryGetPlayerBySlot(slot, out MinigamePlayerState me) && me.IsFinished) { return; } // もう止めた人の2回目は無視
+
+        // 押した瞬間が、プレイ開始から何秒後か(通信の遅れを含まない)
+        float elapsed = (float)(pressedServerTime - ServerRoundStartTime);
+
+        ServerSetValue(slot, Mathf.Abs(elapsed - targetSeconds)); // ★10 この人の今回の値を決める
+        ServerSetFinished(slot);                                   // この人はこのラウンドを終えた
+        ServerSendEvent("ストップ", elapsed, slot);                 // 演出のきっかけを全員に送る
+    }
+
+    // ★11 ラウンドが終わったときに呼ばれる。値を確定させたいときに書く(例: 押さなかった人に罰の値)
+    protected override void OnServerRoundEnd(int round)
+    {
+        for (int i = 0; i < PlayerCount; i++)
+        {
+            MinigamePlayerState player = GetPlayer(i);
+            if (!player.IsFinished)
+            {
+                ServerSetValue(player.SlotIndex, targetSeconds);
+            }
+        }
+    }
+
+    // ★12 次のラウンドの前に呼ばれる。このミニゲームだけのリセットを書く(キャラの位置は基盤が戻す)
+    protected override void OnServerRoundReset(int nextRound)
+    {
+    }
+}
