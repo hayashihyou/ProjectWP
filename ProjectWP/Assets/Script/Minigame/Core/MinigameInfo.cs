@@ -119,6 +119,20 @@ public static class MinigameInfo
     /// <summary>最後の結果(順位の良い順)。まだ結果が出ていなければ null。シーンをまたいでも残る</summary>
     public static IReadOnlyList<MinigameRankEntry> LastResult => lastResult;
 
+    /// <summary>独自の情報を名前で読む。例: MinigameInfo.GetInfo("目標時間").FloatValue。なければ中身なし(Type = None)</summary>
+    public static MinigameValue GetInfo(string infoName)
+    {
+        TryGetInfo(infoName, out MinigameValue value);
+        return value;
+    }
+
+    /// <summary>独自の情報を名前で探す。見つかれば true</summary>
+    public static bool TryGetInfo(string infoName, out MinigameValue value)
+    {
+        value = default;
+        return IsActive && current.TryGetInfo(infoName, out value);
+    }
+
 
     // ==================== 出来事(イベント) ====================
 
@@ -149,6 +163,9 @@ public static class MinigameInfo
     /// <summary>ゲームが終わって結果が届いた(結果。順位の良い順)</summary>
     public static event Action<IReadOnlyList<MinigameRankEntry>> OnGameFinished;
 
+    /// <summary>独自の出来事(名前, 値, 誰の出来事か = 枠番号。誰のものでもなければ -1)。例: 「撮影」でフラッシュを出す</summary>
+    public static event Action<string, MinigameValue, int> OnCustomEvent;
+
 
     // ==================== ここから下は MinigameBase だけが使う ====================
 
@@ -172,6 +189,7 @@ public static class MinigameInfo
         OnPlayerEliminated = null;
         OnPlayerLeft = null;
         OnGameFinished = null;
+        OnCustomEvent = null;
     }
 
     internal static void RaisePhaseChanged(MinigamePhase phase) => OnPhaseChanged?.Invoke(phase);
@@ -182,6 +200,7 @@ public static class MinigameInfo
     internal static void RaisePlayerFinished(int slot) => OnPlayerFinished?.Invoke(slot);
     internal static void RaisePlayerEliminated(int slot) => OnPlayerEliminated?.Invoke(slot);
     internal static void RaisePlayerLeft(int slot) => OnPlayerLeft?.Invoke(slot);
+    internal static void RaiseCustomEvent(string eventName, MinigameValue value, int slot) => OnCustomEvent?.Invoke(eventName, value, slot);
 
     internal static void SetResultAndRaise(MinigameRankEntry[] result)
     {

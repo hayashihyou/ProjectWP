@@ -33,13 +33,17 @@ public class TestMinigame : MinigameBase
             if (finishAtValue > 0f && GetPlayer(i).RoundValue >= finishAtValue)
             {
                 ServerSetFinished(slot);
+                ServerSendEvent("ストップ", GetPlayer(i).RoundValue, slot); // 出来事: 値と「誰の」付き
             }
         }
     }
 
-    // 確認用: ラウンドの始めにタイマーを戻す
+    // 確認用: ラウンドの始めにタイマーを戻し、独自の情報と出来事を送る
     protected override void OnServerRoundStart(int round)
     {
         addTimer = 0f;
+
+        ServerSetInfo("目標", round * 10);          // 情報: ラウンド1なら10、2なら20…
+        ServerSendEvent("ラウンドの合図", round);   // 出来事: 値付き
     }
 }

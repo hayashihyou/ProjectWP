@@ -17,6 +17,7 @@ public class TestMinigameInfoDisplay : MonoBehaviour
         MinigameInfo.OnPlayerValueChanged += HandlePlayerValueChanged;
         MinigameInfo.OnPlayerFinished += HandlePlayerFinished;
         MinigameInfo.OnGameFinished += HandleGameFinished;
+        MinigameInfo.OnCustomEvent += HandleCustomEvent;
     }
 
     private void OnDisable()
@@ -28,6 +29,7 @@ public class TestMinigameInfoDisplay : MonoBehaviour
         MinigameInfo.OnPlayerValueChanged -= HandlePlayerValueChanged;
         MinigameInfo.OnPlayerFinished -= HandlePlayerFinished;
         MinigameInfo.OnGameFinished -= HandleGameFinished;
+        MinigameInfo.OnCustomEvent -= HandleCustomEvent;
     }
 
     private void HandlePhaseChanged(MinigamePhase phase) => Debug.Log($"[UI] フェーズ: {phase}");
@@ -37,6 +39,8 @@ public class TestMinigameInfoDisplay : MonoBehaviour
     private void HandlePlayerValueChanged(int slot, float delta, float newValue) => Debug.Log($"[UI] {slot + 1}P {delta:+0;-0} → {MinigameInfo.FormatValue(newValue)}");
     private void HandlePlayerFinished(int slot) => Debug.Log($"[UI] {slot + 1}P ストップ！");
     private void HandleGameFinished(IReadOnlyList<MinigameRankEntry> result) => Debug.Log($"[UI] ゲーム終了。1位は {result[0].SlotIndex + 1}P");
+    private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
+        => Debug.Log($"[UI] 独自の出来事: {eventName}  値: {value}" + (slot >= 0 ? $"  ({slot + 1}P)" : ""));
 
     // 今の値(プロパティ)は、毎フレーム読んで表示する
     private void OnGUI()
@@ -48,7 +52,7 @@ public class TestMinigameInfoDisplay : MonoBehaviour
             $"ラウンド: {MinigameInfo.CurrentRound}/{MinigameInfo.TotalRounds}   フェーズ: {MinigameInfo.Phase}   残り: {remaining}   操作できる: {MinigameInfo.CanControl}");
 
         string me = MinigameInfo.HasLocalPlayer ? $"{MinigameInfo.LocalPlayer.SlotIndex + 1}P" : "なし";
-        GUI.Label(new Rect(10, 35, 700, 25), $"自分: {me}");
+        GUI.Label(new Rect(10, 35, 700, 25), $"自分: {me}   目標: {MinigameInfo.GetInfo("目標")}");
 
         for (int i = 0; i < MinigameInfo.PlayerCount; i++)
         {

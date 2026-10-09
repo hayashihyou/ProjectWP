@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using System;
@@ -83,6 +84,9 @@ public abstract class MinigameBase : NetworkBehaviour
     // 全員分のプレイヤー情報。サーバーだけが書き換え、全員に同期される
     private readonly NetworkList<MinigamePlayerState> players = new NetworkList<MinigamePlayerState>();
 
+    // 独自の情報(名前と値の組)。サーバーだけが書き換え、全員に同期される。例: 「目標時間」= 10
+    private readonly NetworkList<MinigameCustomInfo> customInfos = new NetworkList<MinigameCustomInfo>();
+
     // 「準備ができた」が届いた人のID(サーバーだけが使う)
     private readonly HashSet<ulong> readyClientIds = new HashSet<ulong>();
 
@@ -131,6 +135,7 @@ public abstract class MinigameBase : NetworkBehaviour
 
         // 担当者のONServerGameSetupより先に作る
         ServerSetupPlayers();
+        customInfos.Clear(); // 前のゲームの独自の情報を残さない
         OnServerGameSetup();
 
         // TODO(ステップ13): イントロ演出(Intro)
@@ -608,6 +613,73 @@ public abstract class MinigameBase : NetworkBehaviour
         players[index] = state;
 
         PlayerFinishedRpc(slot);
+    }
+
+
+    // ---------- ミニゲーム担当者が呼ぶメソッド(独自の情報・出来事) ----------
+
+    /// <summary>独自の情報(状態)を全員に同期する(サーバーのみ)。同じ名前なら上書き。例: ServerSetInfo("目標時間", 10f)</summary>
+    protected void ServerSetInfo(string infoName, MinigameValue value)
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning($"[MinigameBase] {nameof(ServerSetInfo)} はサーバーでしか呼べません");
+            return;
+        }
+
+        FixedString64Bytes key = new FixedString64Bytes(infoName);
+        for (int i = 0; i < customInfos.Count; i++)
+        {
+            if (customInfos[i].Name != key) { continue; }
+
+            // 同じ名前があれば上書きする(値が同じなら、送らずに済ませる)
+            if (customInfos[i].Value.Equals(value)) { return; }
+            customInfos[i] = new MinigameCustomInfo { Name = key, Value = value };
+            return;
+        }
+
+        // 同じ名前がなければ追加する
+        customInfos.Add(new MinigameCustomInfo { Name = key, Value = value });
+    }
+
+    /// <summary>
+    /// 独自の出来事を全員に知らせる(サーバーのみ)。
+    /// 例: ServerSendEvent("撮影") / ServerSendEvent("ストップ", 0.12f, slot)
+    /// </summary>
+    /// <param name="value">一緒に送る値(なくてもよい)</param>
+    /// <param name="slot">誰の出来事か(枠番号)。誰のものでもなければ -1</param>
+    protected void ServerSendEvent(string eventName, MinigameValue value = default, int slot = -1)
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning($"[MinigameBase] {nameof(ServerSendEvent)} はサーバーでしか呼べません");
+            return;
+        }
+
+        CustomEventRpc(new FixedString64Bytes(eventName), value, slot);
+    }
+
+    // 独自の出来事を全員に届ける(全員の端末で実行し、MinigameInfo のイベントを鳴らす)
+    [Rpc(SendTo.Everyone)]
+    private void CustomEventRpc(FixedString64Bytes eventName, MinigameValue value, int slot)
+    {
+        MinigameInfo.RaiseCustomEvent(eventName.ToString(), value, slot);
+    }
+
+    /// <summary>独自の情報を名前で探す。見つかれば true</summary>
+    public bool TryGetInfo(string infoName, out MinigameValue value)
+    {
+        FixedString64Bytes key = new FixedString64Bytes(infoName);
+        for (int i = 0; i < customInfos.Count; i++)
+        {
+            if (customInfos[i].Name == key)
+            {
+                value = customInfos[i].Value;
+                return true;
+            }
+        }
+        value = default;
+        return false;
     }
 
 
