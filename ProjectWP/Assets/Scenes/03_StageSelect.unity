@@ -1517,7 +1517,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MinigameSelectButton
   minigameSelectManager: {fileID: 294840370}
   minigameType: 1
-  sceneName: Test_Player
+  sceneName: MG_Stopwatch
   isAvailable: 1
 --- !u!114 &2053767229
 MonoBehaviour:
