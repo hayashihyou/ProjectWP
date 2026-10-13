@@ -43,6 +43,9 @@ public static class MinigameInfo
     /// <summary>残り時間(秒)。制限なし・プレイ中でないときは -1</summary>
     public static float RemainingTime => IsActive ? current.RemainingTime : -1f;
 
+    /// <summary>今のラウンドのプレイが始まってからの秒数。プレイ中でなければ -1。例: ストップウォッチの「0.00 → 1.23 → …」</summary>
+    public static float ElapsedTime => IsActive ? current.ElapsedTime : -1f;
+
     /// <summary>プレイヤーの人数</summary>
     public static int PlayerCount => IsActive ? current.PlayerCount : 0;
 
@@ -101,13 +104,19 @@ public static class MinigameInfo
         return false;
     }
 
-    /// <summary>今操作してよいか(プレイ中で、自分が脱落していない)</summary>
+    /// <summary>
+    /// 今操作してよいか(プレイ中で、自分が脱落していない)。
+    /// 「終えた人の行動は受け付けない」設定がオンなら、このラウンドを終えた後も false になる
+    /// </summary>
     public static bool CanControl
     {
         get
         {
             if (Phase != MinigamePhase.Playing) { return false; }
-            return TryGetLocalPlayer(out MinigamePlayerState player) && !player.IsEliminated && player.IsConnected;
+            if (!TryGetLocalPlayer(out MinigamePlayerState player)) { return false; }
+            if (player.IsEliminated || !player.IsConnected) { return false; }
+            if (current.IgnoreActionsAfterFinished && player.IsFinished) { return false; }
+            return true;
         }
     }
 
@@ -135,6 +144,26 @@ public static class MinigameInfo
     }
 
 
+    // ==================== 結果の後の行き先(ホストが選ぶ) ====================
+
+    /// <summary>この端末がホストか(結果の後の行き先を選べるのはホストだけ)</summary>
+    public static bool IsHost => NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+
+    /// <summary>
+    /// 結果の後の行き先を選ぶ。例: 結果画面のボタンから MinigameInfo.ChooseNext(MinigameNextAction.Retry)。
+    /// ホストだけが選べて、Phase が Result のときだけ有効(参加者が押しても何も起きない)。全員が一緒に移動する
+    /// </summary>
+    public static void ChooseNext(MinigameNextAction action)
+    {
+        if (!IsActive)
+        {
+            UnityEngine.Debug.LogWarning("[MinigameInfo] ミニゲームが動いていないので、行き先を選べません");
+            return;
+        }
+        current.ChooseNext(action);
+    }
+
+
     // ==================== 行動を送る(この端末 → サーバー) ====================
 
     /// <summary>
@@ -154,8 +183,8 @@ public static class MinigameInfo
 
     // ==================== 出来事(イベント) ====================
 
-    /// <summary>フェーズが変わった(新しいフェーズ)。間のフェーズが一瞬で過ぎると飛ばされることがある</summary>
-    public static event Action<MinigamePhase> OnPhaseChanged;
+    /// <summary>フェーズが変わった(新しいフェーズ, 今のラウンド)。どのフェーズも、一瞬で過ぎた場合でも必ず1回ずつ届く。演出の開始のきっかけに使える</summary>
+    public static event Action<MinigamePhase, int> OnPhaseChanged;
 
     /// <summary>カウントダウン(残り秒。3, 2, 1, 0 = スタート！)</summary>
     public static event Action<int> OnCountdown;
@@ -184,6 +213,9 @@ public static class MinigameInfo
     /// <summary>独自の出来事(名前, 値, 誰の出来事か = 枠番号。誰のものでもなければ -1)。例: 「撮影」でフラッシュを出す</summary>
     public static event Action<string, MinigameValue, int> OnCustomEvent;
 
+    /// <summary>ホストが結果の後の行き先を選んだ(選ばれた行き先)。例: 参加者の画面に「もう一度遊びます」と出す</summary>
+    public static event Action<MinigameNextAction> OnNextChosen;
+
 
     // ==================== ここから下は MinigameBase だけが使う ====================
 
@@ -208,9 +240,10 @@ public static class MinigameInfo
         OnPlayerLeft = null;
         OnGameFinished = null;
         OnCustomEvent = null;
+        OnNextChosen = null;
     }
 
-    internal static void RaisePhaseChanged(MinigamePhase phase) => OnPhaseChanged?.Invoke(phase);
+    internal static void RaisePhaseChanged(MinigamePhase phase, int round) => OnPhaseChanged?.Invoke(phase, round);
     internal static void RaiseCountdown(int secondsLeft) => OnCountdown?.Invoke(secondsLeft);
     internal static void RaiseRoundStarted(int round) => OnRoundStarted?.Invoke(round);
     internal static void RaiseRoundEnded(int round) => OnRoundEnded?.Invoke(round);
@@ -219,6 +252,7 @@ public static class MinigameInfo
     internal static void RaisePlayerEliminated(int slot) => OnPlayerEliminated?.Invoke(slot);
     internal static void RaisePlayerLeft(int slot) => OnPlayerLeft?.Invoke(slot);
     internal static void RaiseCustomEvent(string eventName, MinigameValue value, int slot) => OnCustomEvent?.Invoke(eventName, value, slot);
+    internal static void RaiseNextChosen(MinigameNextAction action) => OnNextChosen?.Invoke(action);
 
     internal static void SetResultAndRaise(MinigameRankEntry[] result)
     {
