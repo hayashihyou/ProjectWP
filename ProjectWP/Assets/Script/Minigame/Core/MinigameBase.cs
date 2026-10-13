@@ -17,6 +17,19 @@ public abstract class MinigameBase : NetworkBehaviour
     [Tooltip("カウントダウンの秒数。3なら「3,2,1,スタート！」。0の場合、スタートの合図のみ")]
     [SerializeField] private int countdownSeconds = 3;
 
+    [Header("演出(待つ秒数。0 = 待たない)")]
+    [Tooltip("イントロ演出の秒数(最初の1回だけ)。秒数で決まらない演出は OnServerIntroAsync を override する")]
+    [SerializeField] private float introSeconds = 0f;
+
+    [Tooltip("ラウンド開始演出の秒数(毎ラウンド、カウントダウンの前)。例: 目標を見せる。秒数で決まらない演出は OnServerRoundIntroAsync を override する")]
+    [SerializeField] private float roundIntroSeconds = 0f;
+
+    [Tooltip("ラウンド終了演出の秒数(毎ラウンド、終わった直後)。例: フィニッシュ！・結果を見せる。秒数で決まらない演出は OnServerRoundEndAsync を override する")]
+    [SerializeField] private float roundEndSeconds = 0f;
+
+    [Tooltip("ゲーム終了演出の秒数(最後のラウンドの後、順位の前)。例: 全員の結果を一斉に見せる。秒数で決まらない演出は OnServerGameEndAsync を override する")]
+    [SerializeField] private float gameEndSeconds = 0f;
+
     [Header("ラウンド")]
     [Tooltip("ラウンド数。1 = ラウンド制ではない")]
     [SerializeField] private int totalRounds = 1;
@@ -29,6 +42,10 @@ public abstract class MinigameBase : NetworkBehaviour
 
     [Tooltip("まとめ方が RankPoints のときの、順位ごとの勝ち点(1位, 2位, 3位, 4位 の順)")]
     [SerializeField] private int[] rankPoints = { 3, 2, 1, 0 };
+
+    [Header("操作")]
+    [Tooltip("オン = このラウンドを終えた人(ServerSetFinished された人)の行動は受け付けない。1ラウンドに1回だけ押すゲーム向け(例: ストップウォッチ)。何度でも押すゲームで ServerSetFinished を使わないなら、オンのままでも影響はない")]
+    [SerializeField] private bool ignoreActionsAfterFinished = true;
 
     [Header("結果")]
     [Tooltip("値が大きいほど勝ちか、小さいほど勝ちか。まとめ方が RankPoints のときは、各ラウンドの順位を決めるのに使う")]
@@ -49,6 +66,10 @@ public abstract class MinigameBase : NetworkBehaviour
 
     [Tooltip("次のラウンドの前に位置を戻す間、全員の画面を暗くする。オフなら暗くせずにその場で戻す")]
     [SerializeField] private bool fadeOnRoundReset = true;
+
+    [Tooltip("最後のラウンドの後も、ゲーム終了演出の前に暗くして明るくする(暗い間にフェーズが GameEnd になる)")]
+    [ShowIf(nameof(fadeOnRoundReset))]
+    [SerializeField] private bool fadeAfterLastRound = true;
 
     [Tooltip("オン = 少しずつ暗くする。オフ = 一瞬で暗くする")]
     [ShowIf(nameof(fadeOnRoundReset))]
@@ -87,8 +108,9 @@ public abstract class MinigameBase : NetworkBehaviour
     // 独自の情報(名前と値の組)。サーバーだけが書き換え、全員に同期される。例: 「目標時間」= 10
     private readonly NetworkList<MinigameCustomInfo> customInfos = new NetworkList<MinigameCustomInfo>();
 
-    // 今のラウンドのプレイが始まったサーバー時刻(サーバーだけが使う)。行動の「押した時刻」の確認と、経過時間の計算に使う
-    private double roundStartServerTime;
+    // 今のラウンドのプレイが始まったサーバー時刻。-1 = まだ始まっていない。サーバーだけが書き換え、全員に同期される
+    // 全員の画面で経過時間をそろえるのと、行動の「押した時刻」の確認に使う
+    private readonly NetworkVariable<double> roundStartServerTime = new NetworkVariable<double>(-1);
 
     // 「準備ができた」が届いた人のID(サーバーだけが使う)
     private readonly HashSet<ulong> readyClientIds = new HashSet<ulong>();
@@ -98,6 +120,10 @@ public abstract class MinigameBase : NetworkBehaviour
 
     // 枠番号ごとの、各ラウンドの値の記録(サーバーだけが使う)。まとめ方が合計以外のときに、合計の値を計算し直すのに使う
     private readonly Dictionary<int, List<float>> roundValueHistory = new Dictionary<int, List<float>>();
+
+    // 進行役(ServerRunGameAsync)を止めるための合図(サーバーだけが使う)。
+    // 通信が止まったとき(OnNetworkDespawn)に止める。オブジェクトが消えるのを待つと、その間に合図(RPC)を送ろうとしてエラーになるため
+    private CancellationTokenSource gameCts;
 
 
 
@@ -131,24 +157,33 @@ public abstract class MinigameBase : NetworkBehaviour
 
 
     // ゲーム全体の進行役(サーバーで呼ばれる)。流れを上から順に、ラウンドの回数だけ繰り返す
-    // 演出(イントロ・ラウンド開始/終了・ゲーム終了)はステップ13、結果はステップ8で差し込む
+    // 各フェーズの演出は OnServer〇〇Async で待つ(何も書かなければ、インスペクターの秒数だけ待つ)
     private async UniTaskVoid ServerRunGameAsync()
     {
-        CancellationToken ct = destroyCancellationToken;
+        // オブジェクトが消えたとき・通信が止まったときの、どちらでも止まるようにする
+        gameCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        CancellationToken ct = gameCts.Token;
 
         // 担当者のONServerGameSetupより先に作る
         ServerSetupPlayers();
         customInfos.Clear(); // 前のゲームの独自の情報を残さない
         OnServerGameSetup();
 
-        // TODO(ステップ13): イントロ演出(Intro)
+        // シーン遷移のフェードインが終わってから始める(画面が暗いうちにイントロやカウントダウンが進まないように)
+        await ServerWaitForSceneTransitionAsync(ct);
+
+        // イントロ演出(最初の1回だけ)
+        ServerSetPhase(MinigamePhase.Intro);
+        await OnServerIntroAsync(ct);
 
         for (int round = 1; round <= totalRounds; round++)
         {
             currentRound.Value = round;
             ServerResetRoundValues();
 
-            // TODO(ステップ13): ラウンド開始演出(RoundIntro)
+            // ラウンド開始演出(例: 目標を見せる)
+            ServerSetPhase(MinigamePhase.RoundIntro);
+            await OnServerRoundIntroAsync(round, ct);
 
             await ServerRunCountdownAsync(ct);
             RoundStartedRpc(round);
@@ -162,18 +197,30 @@ public abstract class MinigameBase : NetworkBehaviour
             // 担当者が OnServerRoundEnd で値を確定させた後に、このラウンドの値を記録して合計を出し直す
             ServerRecordRoundValues();
 
-            // TODO(ステップ13): ラウンド終了演出(RoundEnd)
+            // ラウンド終了演出(例: フィニッシュ！・止めた時間を見せる)。フェーズは ServerEndRound で RoundEnd になっている
+            await OnServerRoundEndAsync(round, ct);
+            roundEndServerTime.Value = -1;
 
-            // 最後のラウンドでなければ、次のラウンドの準備をする
             if (round < totalRounds)
             {
+                // 最後のラウンドでなければ、次のラウンドの準備をする(暗くする → 位置を戻す → 明るくする)
+                await ServerFadeOutAsync(ct);
                 ServerSetPhase(MinigamePhase.RoundReset);
-                await ServerResetForNextRoundAsync(round + 1, ct);
+                ServerResetForNextRound(round + 1);
+                await ServerFadeInAsync(ct);
+            }
+            else if (fadeOnRoundReset && fadeAfterLastRound)
+            {
+                // 最後のラウンドの後: 暗くしている間に GameEnd にして、明るくしてからゲーム終了演出
+                await ServerFadeOutAsync(ct);
+                ServerSetPhase(MinigamePhase.GameEnd);
+                await ServerFadeInAsync(ct);
             }
         }
 
-        ServerSetPhase(MinigamePhase.GameEnd);
-        // TODO(ステップ13): ゲーム終了演出(GameEnd)
+        // ゲーム終了演出(例: 全員の結果を一斉に見せる)
+        ServerSetPhase(MinigamePhase.GameEnd); // 暗くする設定のときは、もう GameEnd になっている(同じ値なら何も起きない)
+        await OnServerGameEndAsync(ct);
 
         // 順位を計算して全員に送る
         List<MinigameRankEntry> ranking = CalculateRanking();
@@ -181,20 +228,19 @@ public abstract class MinigameBase : NetworkBehaviour
         ServerSetPhase(MinigamePhase.Result);
     }
 
-    // 次のラウンドの準備(サーバーで呼ばれる)。値とラウンド数は引き継ぎ、それ以外を戻す
-    // 設定でフェードがオンなら、暗くしている間に位置を戻す
-    private async UniTask ServerResetForNextRoundAsync(int nextRound, CancellationToken ct)
+    // シーン遷移(NetworkSceneTransition)のフェードインが終わるまで待つ(サーバーで呼ばれる)
+    // シーンを単体で再生しているときなど、遷移の仕組みがなければすぐに進む
+    private async UniTask ServerWaitForSceneTransitionAsync(CancellationToken ct)
     {
-        roundEndServerTime.Value = -1;
+        NetworkSceneTransition transition = NetworkSceneTransition.Instance;
+        if (transition == null) { return; }
 
-        // 暗くする(フェードアウトがオフなら一瞬で暗くする)
-        if (fadeOnRoundReset)
-        {
-            float fadeOutSeconds = resetFadeOut ? resetFadeOutSeconds : 0f;
-            FadeOutRpc(fadeOutSeconds);
-            await UniTask.Delay(TimeSpan.FromSeconds(fadeOutSeconds), cancellationToken: ct);
-        }
+        await UniTask.WaitUntil(() => !transition.IsTransitioning, cancellationToken: ct);
+    }
 
+    // 次のラウンドの準備(サーバーで呼ばれる)。値とラウンド数は引き継ぎ、キャラクターの位置などを戻す
+    private void ServerResetForNextRound(int nextRound)
+    {
         if (spawnPoints == null)
         {
             spawnPoints = FindFirstObjectByType<PlayerSpawnPoints>();
@@ -205,16 +251,29 @@ public abstract class MinigameBase : NetworkBehaviour
         }
 
         OnServerRoundReset(nextRound);
+    }
 
-        // 明るくする(フェードインがオフなら一瞬で明るくする)。終わるまで待ってから次のラウンドへ
-        if (fadeOnRoundReset)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(ResetMoveSettleSeconds), cancellationToken: ct);
+    // 全員の画面を暗くして、暗くなるまで待つ(サーバーで呼ばれる)。設定でフェードがオフなら何もしない
+    private async UniTask ServerFadeOutAsync(CancellationToken ct)
+    {
+        if (!fadeOnRoundReset) { return; }
 
-            float fadeInSeconds = resetFadeIn ? resetFadeInSeconds : 0f;
-            FadeInRpc(fadeInSeconds);
-            await UniTask.Delay(TimeSpan.FromSeconds(fadeInSeconds), cancellationToken: ct);
-        }
+        float seconds = resetFadeOut ? resetFadeOutSeconds : 0f; // フェードアウトがオフなら一瞬で暗くする
+        FadeOutRpc(seconds);
+        await UniTask.Delay(TimeSpan.FromSeconds(seconds), cancellationToken: ct);
+    }
+
+    // 暗いまま少し待ってから全員の画面を明るくし、明るくなるまで待つ(サーバーで呼ばれる)。設定でフェードがオフなら何もしない
+    private async UniTask ServerFadeInAsync(CancellationToken ct)
+    {
+        if (!fadeOnRoundReset) { return; }
+
+        // キャラクターの位置は所有者の端末が動かして全員に配るので、移動が全員の画面に届くのを待ってから明るくする
+        await UniTask.Delay(TimeSpan.FromSeconds(ResetMoveSettleSeconds), cancellationToken: ct);
+
+        float seconds = resetFadeIn ? resetFadeInSeconds : 0f; // フェードインがオフなら一瞬で明るくする
+        FadeInRpc(seconds);
+        await UniTask.Delay(TimeSpan.FromSeconds(seconds), cancellationToken: ct);
     }
 
     // 全員の画面を暗くする(全員の端末で実行)。フェードの処理は既存の SceneLoader に任せる
@@ -476,7 +535,7 @@ public abstract class MinigameBase : NetworkBehaviour
             roundEndServerTime.Value = -1;
         }
         // フェーズをプレイ中に(始まった時刻を覚えておく)
-        roundStartServerTime = NetworkManager.ServerTime.Time;
+        roundStartServerTime.Value = NetworkManager.ServerTime.Time;
         ServerSetPhase(MinigamePhase.Playing);
     }
 
@@ -511,6 +570,9 @@ public abstract class MinigameBase : NetworkBehaviour
     /// <summary>値の種類(得点 / 時間 / 回数)</summary>
     public MinigameValueKind ValueKind => valueKind;
 
+    /// <summary>このラウンドを終えた人の行動を受け付けない設定か(MinigameInfo.CanControl が使う)</summary>
+    public bool IgnoreActionsAfterFinished => ignoreActionsAfterFinished;
+
     /// <summary>値を表示用の文字にする(設定の表示形式・単位を使う)。例: 12.34 → "12.34秒"</summary>
     public string FormatValue(float value) => value.ToString(valueFormat) + valueUnit;
 
@@ -523,29 +585,58 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
     /// <summary>
-    /// 残り時間(秒)。制限なしの時は-1
+    /// 残り時間(秒)。制限なし・プレイ中でないときは -1
     /// </summary>
     public float RemainingTime
     {
         get
         {
             if (!IsSpawned) { return -1; }
-            if (roundEndServerTime.Value < 0.0f) { return -1; }
+            // プレイ中でなければ -1(ラウンド終了の演出中に、残り時間が減り続けて見えないように)
+            if (Phase != MinigamePhase.Playing || roundEndServerTime.Value < 0.0f) { return -1; }
             double remaining = roundEndServerTime.Value - NetworkManager.ServerTime.Time;
             return Mathf.Max(0f, (float)remaining);
         }
     }
 
+    /// <summary>
+    /// 今のラウンドのプレイが始まってからの秒数。プレイ中でなければ -1。
+    /// 制限時間がないゲームでも使える。全員の画面でそろう(例: ストップウォッチの「0.00 → 1.23 → …」)
+    /// </summary>
+    public float ElapsedTime
+    {
+        get
+        {
+            if (!IsSpawned) { return -1; }
+            if (Phase != MinigamePhase.Playing || roundStartServerTime.Value < 0) { return -1; }
+            double elapsed = NetworkManager.ServerTime.Time - roundStartServerTime.Value;
+            return Mathf.Max(0f, (float)elapsed);
+        }
+    }
+
     // フェーズを変える。サーバーだけ呼べる
+    // 状態(NetworkVariable)を変えると同時に、「変わった」という出来事を RPC で全員に送る
+    // (NetworkVariable だけだと、一瞬で過ぎたフェーズが参加者に届かないことがあるため)
     protected void ServerSetPhase(MinigamePhase next)
     {
         if (!IsServer)
         {
-            Debug.LogWarning("ServerSetPhaseはサーバーでしか呼べません"); 
+            Debug.LogWarning("ServerSetPhaseはサーバーでしか呼べません");
             return;
         }
 
+        if (phase.Value == next) { return; } // 同じフェーズなら何もしない(イベントも鳴らさない)
+
         phase.Value = next;
+        PhaseChangedRpc(next, currentRound.Value);
+    }
+
+    // フェーズが変わったことを全員に知らせる(全員の端末で実行)。確認用にログも出す
+    [Rpc(SendTo.Everyone)]
+    private void PhaseChangedRpc(MinigamePhase newPhase, int round)
+    {
+        Debug.Log($"[MinigameBase]フェーズ : {newPhase}(ラウンド {round})");
+        MinigameInfo.RaisePhaseChanged(newPhase, round);
     }
 
 
@@ -687,6 +778,65 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
 
+    // ---------- 結果の後の行き先(ホストが選ぶ) ----------
+
+    // 行き先をもう選んだか(サーバーだけが使う)。2回選ばれて遷移が重ならないようにする
+    private bool nextChosen;
+
+    /// <summary>
+    /// 結果の後の行き先を選ぶ。ホストだけが選べて、Phase が Result のときだけ有効(参加者が呼んでも何も起きない)。
+    /// Retry = 同じミニゲームをもう一度 / ToStageSelect = ミニゲーム選択へ / ToTitle = 部屋を解散してタイトルへ。
+    /// UI からは MinigameInfo.ChooseNext で呼べる
+    /// </summary>
+    public void ChooseNext(MinigameNextAction action)
+    {
+        if (!IsServer)
+        {
+            Debug.Log("[MinigameBase] 次の行き先はホストだけが選べます");
+            return;
+        }
+        if (Phase != MinigamePhase.Result)
+        {
+            Debug.LogWarning("[MinigameBase] 次の行き先は、結果(Result)のときだけ選べます");
+            return;
+        }
+        if (nextChosen) { return; }
+
+        NetworkSceneTransition transition = NetworkSceneTransition.Instance;
+        if (transition == null)
+        {
+            Debug.LogWarning("[MinigameBase] NetworkSceneTransition が見つからないので、移動できません(タイトルから始めてください)");
+            return;
+        }
+
+        nextChosen = true;
+        NextChosenRpc(action); // UI に「ホストが〇〇を選んだ」を知らせる
+
+        switch (action)
+        {
+            case MinigameNextAction.Retry:
+                // 同じシーンを読み込み直す(全員が一緒に移動する)
+                transition.LoadSceneForAllAsync(gameObject.scene.name).Forget();
+                break;
+            case MinigameNextAction.ToStageSelect:
+                transition.LoadSceneForAllAsync(SceneNames.StageSelect).Forget();
+                break;
+            case MinigameNextAction.ToTitle:
+                // 部屋を解散して、全員タイトルへ(参加者には「ホストが部屋を解散しました」と出る)
+                transition.ReturnToTitleAsync().Forget();
+                break;
+        }
+    }
+
+    // 行き先が選ばれたことを全員に知らせる(全員の端末で実行)
+    [Rpc(SendTo.Everyone)]
+    private void NextChosenRpc(MinigameNextAction action)
+    {
+        Debug.Log($"[MinigameBase] 次の行き先: {action}");
+        MinigameInfo.RaiseNextChosen(action);
+    }
+
+
     // ---------- 行動の送信(端末 → サーバー) ----------
 
     /// <summary>
@@ -729,15 +879,18 @@ public abstract class MinigameBase : NetworkBehaviour
         MinigamePlayerState player = players[index];
         if (!player.IsConnected || player.IsEliminated) { return; }
 
+        // 設定がオンなら、このラウンドを終えた人の操作も無視する(2回押しても値が上書きされないように)
+        if (ignoreActionsAfterFinished && player.IsFinished) { return; }
+
         // 押した時刻は端末から届く値なので、おかしな値にならないよう「プレイ開始 〜 今」の範囲に収める
         double now = NetworkManager.ServerTime.Time;
-        pressedServerTime = Math.Clamp(pressedServerTime, roundStartServerTime, now);
+        pressedServerTime = Math.Clamp(pressedServerTime, roundStartServerTime.Value, now);
 
         OnServerPlayerAction(player.SlotIndex, actionName.ToString(), value, pressedServerTime);
     }
 
     /// <summary>今のラウンドのプレイが始まったサーバー時刻(サーバーのみ)。経過時間 = pressedServerTime - ServerRoundStartTime</summary>
-    protected double ServerRoundStartTime => roundStartServerTime;
+    protected double ServerRoundStartTime => roundStartServerTime.Value;
 
 
     // ---------- ミニゲーム担当者が書く場所(すべて任意。上書きしたいものだけ override する) ----------
@@ -752,7 +905,7 @@ public abstract class MinigameBase : NetworkBehaviour
     /// <summary>プレイ中、毎フレーム呼ばれる(サーバーのみ)</summary>
     protected virtual void OnServerPlayUpdate(float deltaTime) { }
 
-    /// <summary>ラウンドが終わったときに呼ばれる(サーバーのみ)</summary>
+    /// <summary>ラウンドが終わった直後に呼ばれる。値を確定させる場所(サーバーのみ)。このあとラウンド終了演出(OnServerRoundEndAsync)になる</summary>
     protected virtual void OnServerRoundEnd(int round) { }
 
     /// <summary>次のラウンドの前に呼ばれる。ミニゲーム独自のリセットを書く(サーバーのみ)。キャラクターの位置は基盤が戻す</summary>
@@ -765,7 +918,32 @@ public abstract class MinigameBase : NetworkBehaviour
     /// </summary>
     protected virtual void OnServerPlayerAction(int slot, string actionName, MinigameValue value, double pressedServerTime) { }
 
-    // ネットワークに出てきたとき、全員の端末で呼ばれる。フェーズの変化を見張り始め、「準備できた」を送る
+    // ---------- ミニゲーム担当者が書く場所(演出で待つ。すべて任意) ----------
+    // 何も書かなければ、インスペクターの「演出」の秒数だけ待つ。
+    // 秒数で決まらない演出(カメラが動き終わるまで など)は override して、終わるまで await する。
+    // 設定の秒数も待ちたいときは、override の中で await base.On〇〇Async(...) を呼ぶ。
+    // 待っている間はフェーズが Playing ではないので、プレイヤーは操作できない(CanControl = false)
+
+    /// <summary>イントロ演出(最初の1回だけ)。これが終わるまで、最初のラウンドは始まらない(サーバーのみ)</summary>
+    protected virtual UniTask OnServerIntroAsync(CancellationToken ct) => ServerWaitSecondsAsync(introSeconds, ct);
+
+    /// <summary>ラウンド開始演出(毎ラウンド、カウントダウンの前)。例: 目標を見せる(サーバーのみ)</summary>
+    protected virtual UniTask OnServerRoundIntroAsync(int round, CancellationToken ct) => ServerWaitSecondsAsync(roundIntroSeconds, ct);
+
+    /// <summary>ラウンド終了演出(毎ラウンド、OnServerRoundEnd の後)。例: フィニッシュ！・結果を見せる(サーバーのみ)</summary>
+    protected virtual UniTask OnServerRoundEndAsync(int round, CancellationToken ct) => ServerWaitSecondsAsync(roundEndSeconds, ct);
+
+    /// <summary>ゲーム終了演出(最後のラウンドの後、順位を出す前)。例: 全員の結果を一斉に見せる(サーバーのみ)</summary>
+    protected virtual UniTask OnServerGameEndAsync(CancellationToken ct) => ServerWaitSecondsAsync(gameEndSeconds, ct);
+
+    /// <summary>指定した秒数だけ待つ(0 以下ならすぐ終わる)。演出の override の中で使える</summary>
+    protected UniTask ServerWaitSecondsAsync(float seconds, CancellationToken ct)
+    {
+        if (seconds <= 0f) { return UniTask.CompletedTask; }
+        return UniTask.Delay(TimeSpan.FromSeconds(seconds), cancellationToken: ct);
+    }
+
+    // ネットワークに出てきたとき、全員の端末で呼ばれる。窓口に登録し、「準備できた」を送る
     public override void OnNetworkSpawn()
     {
         // 終了条件は、同じオブジェクトに Add Component で付けられたものを集めておく
@@ -774,20 +952,20 @@ public abstract class MinigameBase : NetworkBehaviour
         // UI 用の窓口(MinigameInfo)に、今動いているミニゲームとして登録する
         MinigameInfo.Register(this);
 
-        phase.OnValueChanged += OnPhaseChanged;
         NotifyReadyRpc();
     }
-    // ネットワークから消えるとき、全員の端末で呼ばれる。見張りをやめ、窓口から外す(イベントの登録も片付けられる)
+    // ネットワークから消えるとき、全員の端末で呼ばれる。進行役を止め、窓口から外す(イベントの登録も片付けられる)
     public override void OnNetworkDespawn()
     {
-        phase.OnValueChanged -= OnPhaseChanged;
+        // 通信が止まった後に、進行役がカウントダウンなどの合図を送ろうとしないように止める
+        if (gameCts != null)
+        {
+            gameCts.Cancel();
+            gameCts.Dispose();
+            gameCts = null;
+        }
+
         MinigameInfo.Unregister(this);
-    }
-    // フェーズが変わったとき、全員の端末で呼ばれる。確認用にログを出し、UI に知らせる
-    private void OnPhaseChanged(MinigamePhase previous, MinigamePhase current)
-    {
-        Debug.Log($"[MinigameBase]フェーズ : {previous} → {current}");
-        MinigameInfo.RaisePhaseChanged(current);
     }
 
 

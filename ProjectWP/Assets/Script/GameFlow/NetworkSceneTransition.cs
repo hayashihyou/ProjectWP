@@ -36,6 +36,9 @@ public class NetworkSceneTransition : MonoBehaviour
 {
     public static NetworkSceneTransition Instance { get; private set; }
 
+    /// <summary>今シーン遷移(フェード・読み込み)の途中か。ミニゲームが「フェードインが終わってから始める」ために使う</summary>
+    public bool IsTransitioning => isTransitioning;
+
     [Header("フェードの秒数")]
     [SerializeField] private float fadeOutDuration = 0.3f;
     [SerializeField] private float fadeInDuration = 0.3f;
