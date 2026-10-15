@@ -107,3 +107,11 @@ InitTestScene*.unity*
 
 # Unity MCP debug screenshots (not game assets)
 /[Aa]ssets/[Ss]creenshots/
+
+# Unity Asset Store assets (public repo: do not redistribute; each member imports them from the Asset Store)
+/[Aa]ssets/CuteMagic_Room/
+/[Aa]ssets/CuteMagic_Room.meta
+/[Aa]ssets/LowPolyLivingRoomPack/
+/[Aa]ssets/LowPolyLivingRoomPack.meta
+/[Aa]ssets/Pandazole_Lowpoly_Asset_Bundle/
+/[Aa]ssets/Pandazole_Lowpoly_Asset_Bundle.meta
