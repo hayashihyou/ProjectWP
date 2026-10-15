@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using Unity.Collections;
 using Unity.Netcode;
@@ -549,6 +549,11 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
 
+    /// <summary>
+    /// このミニゲームの種類。各ミニゲームonerrideして返す
+    /// 入力(PlayerMinigameInput)が、どの操作を受け付けるかを切り替えるのに使う
+    /// </summary>
+    public virtual MinigameType Type => MinigameType.None;
     /// <summary>
     /// 今のフェーズ
     /// =>とすることで読むだけのプロパティになる
