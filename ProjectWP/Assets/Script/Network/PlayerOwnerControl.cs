@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
@@ -49,6 +49,9 @@ public class PlayerOwnerControl : NetworkBehaviour
     private CharacterController characterController;
     private Animator animator;
 
+    // CharacterControllerが無効の間(=他人のキャラ、移動を止めているシーン)に使うの、体の当たり判定
+    private CapsuleCollider bodyCollider;
+
     // このPCのこのキャラクターを、このPCの入力で操作してよいか
     private bool isLocallyControlled;
 
@@ -62,6 +65,28 @@ public class PlayerOwnerControl : NetworkBehaviour
         playerMovement = GetComponent<PlayerMovement>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+
+        SetupBodyCollider();
+    }
+
+    // 体の当たり判定を用意する
+    private void SetupBodyCollider()
+    {
+        bodyCollider = GetComponent<CapsuleCollider>();
+        if (bodyCollider == null)
+        {
+            bodyCollider = gameObject.AddComponent<CapsuleCollider>();
+        }
+
+        if(characterController != null)
+        {
+            bodyCollider.center = characterController.center;
+            bodyCollider.radius = characterController.radius;
+            bodyCollider.height = characterController.height;
+            bodyCollider.direction = 1; // Y軸方向
+        }
+
+        bodyCollider.enabled = false;
     }
 
     private void Start()

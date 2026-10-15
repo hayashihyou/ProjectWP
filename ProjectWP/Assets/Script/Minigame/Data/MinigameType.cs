@@ -5,5 +5,5 @@
 public enum  MinigameType
 {
     None,      // ミニゲーム未選択
-    TimerStop, // タイマーを止めるミニゲーム
+    Stopwatch, // タイマーを止めるミニゲーム
 }

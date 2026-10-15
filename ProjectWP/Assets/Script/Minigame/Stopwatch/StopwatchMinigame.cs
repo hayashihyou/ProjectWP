@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Xml.Schema;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -24,6 +24,8 @@ public class StopwatchMinigame : MinigameBase
 
     // 今のラウンドの目標の秒数(サーバーだけが使う)
     private float targetSeconds;
+
+    public override MinigameType Type => MinigameType.Stopwatch;
 
 
     // ラウンド開始演出

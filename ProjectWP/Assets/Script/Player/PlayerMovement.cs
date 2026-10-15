@@ -75,8 +75,13 @@ public class PlayerMovement : MonoBehaviour
     // 現在の入力を取得する
     private void ReadInput()
     {
-        //方向ベクトルを取得
-        moveInput = moveAction.ReadValue<Vector2>();
+        if(isMovementLocked)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
+        moveInput = isMovementLocked ? Vector2.zero : moveAction.ReadValue<Vector2>();
     }
 
     public void SetMovementLocked(bool locked)
@@ -141,6 +146,12 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 GetMoveDirection()
     {
+        // シーンが変わってカメラが消えていたら、今のシーンのカメラを取り直す(「もう一度」で同じシーンを読み直したときなど)
+        if (mainCameraTransform == null && Camera.main != null)
+        {
+            mainCameraTransform = Camera.main.transform;
+        }
+
         // カメラが見つからない場合は、従来通りワールド基準で計算する(保険)
         if (mainCameraTransform == null)
         {

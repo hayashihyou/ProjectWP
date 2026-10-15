@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 
@@ -30,6 +30,9 @@ public static class MinigameInfo
 
     /// <summary>ミニゲームが動いているか(false のときは、下の値はすべて初期値を返す)</summary>
     public static bool IsActive => current != null && current.IsSpawned;
+
+    /// <summary>今動いているミニゲームの種類(動いてなければNone)</summary>
+    public static MinigameType CurrentType => IsActive ? current.Type : MinigameType.None;
 
     /// <summary>今のフェーズ</summary>
     public static MinigamePhase Phase => IsActive ? current.Phase : MinigamePhase.WaitingForPlayers;
