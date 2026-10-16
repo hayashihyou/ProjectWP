@@ -82,6 +82,16 @@ public class SceneLoader : MonoBehaviour
     [Tooltip("フェードアウト完了後〜フェードイン開始前の間だけ表示するUI（Now Loadingのテキストやくるくる回るアイコンなど）。任意。FadeCanvasの子にしておくと自動でDontDestroyOnLoad対象になる")]
     [SerializeField] private GameObject _loadingIndicator;
 
+    // ロード進捗に合わせて動かすローディングバー(任意。未設定でもエラーにならない)
+    [Tooltip("ロード進捗を反映するLoadingBar。Loading Indicatorの子(または同じオブジェクト)に付けたものを設定する")]
+    [SerializeField] private LoadingBar _loadingBar;
+
+    // 100%到達後の演出
+    [Tooltip("バーが100%になってから、100%を見せるために止める秒数")]
+    [SerializeField] private float _completeHoldSeconds = 0.3f;
+    [Tooltip("100%を見せたあと、ローディング表示がフェードアウトする秒数")]
+    [SerializeField] private float _completeFadeSeconds = 0.3f;
+
     // フェード中に1フレームで進める時間の上限(秒)。30fps相当。
     // これより重いフレームでは、フェードが指定の秒数より少し長くなる。
     private const float MaxFadeStepSeconds = 1f / 30f;
@@ -204,12 +214,29 @@ public class SceneLoader : MonoBehaviour
                 // 実進捗と経過時間の遅いほうに合わせると、ゲージが一瞬で振り切れない
                 progress?.Report(Mathf.Min(loadRatio, timeRatio));
 
+                // ローディングバーに進捗を渡す(op.progress は0〜0.9なので0.9で割って0〜1にする)
+                if (_loadingBar != null) _loadingBar.SetProgress(op.progress / 0.9f);
+
                 if (op.progress >= 0.9f && elapsed >= minimumDuration) break;
 
                 await UniTask.Yield(PlayerLoopTiming.Update, linkedCt);
             }
 
             progress?.Report(1.0f);
+
+            // ロード完了時にバーを満タンにする
+            if (_loadingBar != null) _loadingBar.SetProgress(1.0f);
+
+            // (useLoadingIndicatorがfalseのときはバーが非表示で動かないので、待たない)
+            if (useLoadingIndicator && _loadingBar != null)
+            {
+                // バーが100%まで伸びきるのを待つ
+                await UniTask.WaitUntil(() => _loadingBar.IsFilled, cancellationToken: linkedCt);
+                // 100%を見せるために少し待つ
+                await UniTask.Delay(TimeSpan.FromSeconds(_completeHoldSeconds), ignoreTimeScale: true, cancellationToken: linkedCt);
+                // ローディング表示を短くフェードアウト
+                await _loadingBar.FadeOutAsync(_completeFadeSeconds, linkedCt);
+            }
 
             op.allowSceneActivation = true;
             await UniTask.WaitUntil(() => op.isDone, cancellationToken: linkedCt);
