@@ -842,6 +842,7 @@ GameObject:
   - component: {fileID: 1157359456}
   - component: {fileID: 1157359458}
   - component: {fileID: 1157359457}
+  - component: {fileID: 1157359459}
   m_Layer: 5
   m_Name: LoardingText
   m_TagString: Untagged
@@ -859,7 +860,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 506223405}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -888,10 +889,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u308D\u3046\u3067\u3043\u3093\u3050\u4EEE"
+  m_text: now loarding...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 5ab3b40c0cf82a848968ef4c1d72f488, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 52a0329de7a44a84797a4fa0a8e8ccd6, type: 2}
+  m_sharedMaterial: {fileID: -3144604645919337874, guid: 52a0329de7a44a84797a4fa0a8e8ccd6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -968,6 +969,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1157359455}
   m_CullTransparentMesh: 1
+--- !u!114 &1157359459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1157359455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26dcf4ee17624c24ba838032821a5492, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TMPTextWaveAnimator
+  playOnEnable: 1
+  useUnscaledTime: 1
+  loop: 1
+  loopDelay: 0.5
+  useRange: 0
+  startIndex: 12
+  endIndex: 14
+  amplitude: 5
+  speed: 3
+  interval: 0.2
+  scaleAmount: 0
 --- !u!1 &1291239427
 GameObject:
   m_ObjectHideFlags: 0
@@ -1205,7 +1229,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionTrigger
   _targetSceneName: 01_Title
   _delaySeconds: 3
-  _minimumLoadDuration: 0
+  _minimumLoadDuration: 5
   _useFade: 1
   _fadeOutDuration: 1
   _fadeInDuration: 1
@@ -1423,8 +1447,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 0%
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 52a0329de7a44a84797a4fa0a8e8ccd6, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: a46b07fee76046741a1fb465600e5984, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
