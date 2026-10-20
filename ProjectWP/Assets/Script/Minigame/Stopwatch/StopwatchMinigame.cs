@@ -17,10 +17,11 @@ public class StopwatchMinigame : MinigameBase
     [SerializeField] private int maxTargetSeconds = 15;
 
     // UI・入力の担当と名前をそろえる(1文字でも違うと届かない)
-    private const string TargetInfoName = "目標時間";   // 情報 : 今のラウンドの目標の秒数
-    private const string StopActionName = "Stop";       // 行動 : ストップボタンが押された
-    private const string StopEventName = "ストップ";    // 出来事 : 誰かが止めた(値 = 止めた秒数)
-    private const string TimeUpEventName = "時間切れ";  // 出来事 : 押さないまま時間切れになった(値 = 時間切れの秒数)
+    // public にしてあるので、他のスクリプトからは StopwatchMinigame.StopEventName のように使うと打ち間違いがない
+    public const string TargetInfoName = "目標時間";   // 情報 : 今のラウンドの目標の秒数
+    public const string StopActionName = "Stop";       // 行動 : ストップボタンが押された
+    public const string StopEventName = "ストップ";    // 出来事 : 誰かが止めた(値 = 止めた秒数)
+    public const string TimeUpEventName = "時間切れ";  // 出来事 : 押さないまま時間切れになった(値 = 時間切れの秒数)
 
     // 今のラウンドの目標の秒数(サーバーだけが使う)
     private float targetSeconds;
