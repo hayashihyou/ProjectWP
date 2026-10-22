@@ -319,17 +319,56 @@ public class SceneLoader : MonoBehaviour
     }
 
     // ==================================================
-    // ローディング表示のON/OFF
+    // ローディング表示
     // ==================================================
 
-    private void ShowLoadingIndicator()
+    // オンラインの遷移(NetworkSceneTransition)は、シーンの読み込みをNetcodeに任せるので、
+    // フェードと同じく、ローディング表示も単体で呼べるようにpublicにしている。
+    // オンラインでの使い方(呼ぶ順番):
+    //   1. 暗くなったら ShowLoadingIndicator      … ローディング表示を出す
+    //   2. 読み込み中は SetLoadingProgress        … バーに進み具合を渡す
+    //      (IsLoadingBarFilled で、バーが100%まで伸びきったかを確認できる)
+    //   3. 読み込みが終わったら FinishLoadingIndicatorAsync … 100%を見せてから暗転
+    //   4. 明るくする前に HideLoadingIndicator    … ローディング表示を消す
+
+    public void ShowLoadingIndicator()
     {
         if (_loadingIndicator != null) _loadingIndicator.SetActive(true);
     }
 
-    private void HideLoadingIndicator()
+    public void HideLoadingIndicator()
     {
         if (_loadingIndicator != null) _loadingIndicator.SetActive(false);
+    }
+
+    /// <summary>ローディングバーが100%まで伸びきったか。バーが未設定なら、待たせないようtrue扱いにする</summary>
+    public bool IsLoadingBarFilled => _loadingBar == null || _loadingBar.IsFilled;
+
+    /// <summary>ローディングバーに進捗(0〜1)を渡す。バーが未設定なら何もしない</summary>
+    public void SetLoadingProgress(float progress)
+    {
+        if (_loadingBar != null) _loadingBar.SetProgress(progress);
+    }
+
+    /// <summary>
+    /// オンラインの遷移用の、ロードが終わった後の演出。
+    /// 中身は LoadSceneAsync の「100%まで待つ → 少し見せる → 暗転」と同じで、設定値もそちらと共通。
+    /// 表示そのものは消さないので、終わった後に HideLoadingIndicator を呼ぶこと。
+    /// </summary>
+    public async UniTask FinishLoadingIndicatorAsync(CancellationToken ct = default)
+    {
+        // バーが無い、または表示されていない(=バーが動かず満タンにならない)ときは待たない
+        if (_loadingBar == null || !_loadingBar.isActiveAndEnabled) return;
+
+        // バーが100%まで伸びきるのを待つ
+        _loadingBar.SetProgress(1.0f);
+        await UniTask.WaitUntil(() => _loadingBar.IsFilled, cancellationToken: ct);
+
+        // 100%を見せるために少し待つ
+        await UniTask.Delay(TimeSpan.FromSeconds(_completeHoldSeconds), ignoreTimeScale: true, cancellationToken: ct);
+
+        // ローディング表示を短くフェードアウト
+        await _loadingBar.FadeOutAsync(_completeFadeSeconds, ct);
     }
 
     // ==================================================
