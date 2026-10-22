@@ -17,9 +17,20 @@ using UnityEngine.SceneManagement;
 ///   4. 全員から返事が来たら(または一定時間たったら)、ホストが NetworkSceneManager でシーンを読み込む
 ///      (参加者はNetcodeが自動で付いてこさせる)
 ///   5. 全員の読み込みが終わったら(または一定時間たったら)、ホストが「明るくして」(FadeIn)を送り、
-///      自分もフェードインする
+///      自分もフェードインする。
+///      「明るくして」には「明るくし始めるサーバー時刻」が入っていて、全員がその時刻まで待ってから
+///      一斉にフェードインする(ローディングの締めくくりの長さや通信の遅れが人によって違っても、
+///      画面が見え始めるタイミングと、その後の処理が始まるタイミングがそろう)
+///
+/// 暗くなっている間(2〜5)は、各自の画面に SceneLoader のローディング表示(バー)を出す。
+/// バーは各自の端末の読み込みの進み具合で動き、明るくする前に「100%を見せてから暗転」して消える。
+/// (ローディング表示の見た目と演出は SceneLoader / LoadingBar のものをそのまま使う)
+/// 自分のバーが100%になっても、まだ他の人の読み込みが終わっていない(=「明るくして」が来ていない)間は、
+/// 「他の人の読み込みを待っています」の小さなお知らせ(LoadingWaitNotice)を出す。
 ///
 /// タイトルに戻る(ReturnToTitleAsync)も担当する。ホストが呼ぶと部屋の解散、参加者が呼ぶと自分だけ抜ける。
+/// ホストが解散したとき、参加者は「これから解散する」(Disband)を受け取った時点で、自分からタイトルに戻り始める
+/// (切断を待っていると、切断がすぐに分からない参加者だけ取り残されることがあるため)。
 /// ホストとの接続が切れた参加者は、画面にお知らせ(ScreenNotice)を出してから、自動でタイトルに戻る。
 /// お知らせの文言は「ホストが解散した」と「ホストとの接続が切れた(回線が落ちた等)」で出し分ける。
 ///
@@ -59,6 +70,22 @@ public class NetworkSceneTransition : MonoBehaviour
 
     private const string HostDisbandedNotice = "ホストが部屋を解散しました。\nタイトルに戻ります。";
     private const string HostDisconnectedNotice = "ホストとの接続が切れました。\nタイトルに戻ります。";
+
+    // 自分の読み込みが終わって、他の人の読み込みを待っている間に出すお知らせ
+    private const string WaitingForOthersNotice = "他の人の読み込みを待っています。少々お待ちください";
+
+    [Header("ローディング表示")]
+    [Tooltip("ONにすると、暗くなっている間だけSceneLoaderのローディング表示(バー)を出す。OFFなら今までどおり暗転だけ")]
+    [SerializeField] private bool useLoadingIndicator = true;
+
+    [Header("明るくするタイミングをそろえる")]
+    [Tooltip("ローディング表示の締めくくり(バーが100%まで伸びる → 100%を見せる → 暗転)にかかる秒数の目安。\n" +
+             "ホストが「明るくして」を送ってから、この秒数(+下の余裕)が過ぎた時刻に全員が一斉に明るくし始める。\n" +
+             "短すぎると締めくくりが間に合わなかった人だけ遅れて明るくなる。ローディング表示がOFFのときは使わない")]
+    [SerializeField] private float loadingFinishSeconds = 1.3f;
+
+    [Tooltip("「明るくして」が参加者に届くまでの通信の遅れの分の余裕(秒)")]
+    [SerializeField] private float fadeInNetworkMargin = 0.2f;
 
     [Header("読み込みの再挑戦")]
     [Tooltip("誰かがまだ同期中などで読み込みを始められなかったときに、もう一度試す回数")]
@@ -117,6 +144,17 @@ public class NetworkSceneTransition : MonoBehaviour
     // 動いてしまわないようにするための番号。
     private int clientFadeOutCount;
 
+    // ---------- ローディングバーで使う(ホスト・参加者の両方) ----------
+
+    // 自分の端末で読み込み中のシーンの進み具合。Netcodeがシーンの読み込みを始めたときに渡してくる。
+    // 読み込んでいないときはnull。
+    private AsyncOperation loadingOperation;
+
+    // ローディング表示を出してから、「明るくする」段階に入るまでの間かどうか。
+    // この間に自分のバーが100%になったら、「他の人の読み込みを待っています」を出す。
+    // (「明るくする」段階に入った後にバーが100%になっても、もう待つ必要は無いので出さない)
+    private bool isWaitingForFadeIn;
+
     private void Awake()
     {
         Instance = this;
@@ -141,6 +179,9 @@ public class NetworkSceneTransition : MonoBehaviour
             networkManager.OnServerStopped -= OnNetworkStopped;
             networkManager.OnClientStopped -= OnNetworkStopped;
             networkManager.OnClientConnectedCallback -= OnClientConnected;
+
+            // SceneManagerは接続していないときはnullなので、ある場合だけ外す
+            if (networkManager.SceneManager != null) networkManager.SceneManager.OnSceneEvent -= OnSceneEvent;
         }
 
         transitionCts?.Dispose();
@@ -157,12 +198,68 @@ public class NetworkSceneTransition : MonoBehaviour
         messaging.RegisterNamedMessageHandler(FadeOutDoneMessage, OnFadeOutDoneReceived);
         messaging.RegisterNamedMessageHandler(FadeInMessage, OnFadeInReceived);
         messaging.RegisterNamedMessageHandler(DisbandMessage, OnDisbandReceived);
+
+        // シーンの読み込み状況を受け取る(ローディングバー用)。
+        // SceneManagerも開始するたびに作り直される。ホストはここに2回来るので、
+        // 二重に登録しないよう、一度外してから登録する。
+        networkManager.SceneManager.OnSceneEvent -= OnSceneEvent;
+        networkManager.SceneManager.OnSceneEvent += OnSceneEvent;
     }
 
     private void OnClientConnected(ulong clientId)
     {
         // 自分自身の接続が完了したときだけ覚えておく(他の人の接続でも呼ばれるため)
         if (clientId == networkManager.LocalClientId) hasConnected = true;
+    }
+
+    // ============================== ローディングバー ==============================
+
+    private void OnSceneEvent(SceneEvent sceneEvent)
+    {
+        // 自分の端末でシーンの読み込みが始まったときだけ、進み具合を覚えておく。
+        // (ホストには参加者全員分のイベントも届くので、自分の分以外は無視する)
+        if (sceneEvent.SceneEventType != SceneEventType.Load) return;
+        if (sceneEvent.ClientId != networkManager.LocalClientId) return;
+
+        loadingOperation = sceneEvent.AsyncOperation;
+    }
+
+    private void Update()
+    {
+        if (loadingOperation == null) return;
+
+        // ローディングバーに進捗を渡す(op.progress は0〜0.9なので0.9で割って0〜1にする)
+        // (SceneLoader.LoadSceneAsync でバーに進捗を渡している書き方と同じ)
+        SceneLoader.Instance.SetLoadingProgress(loadingOperation.progress / 0.9f);
+
+        // 読み込みが終わったら、もう見なくてよいので手放す。
+        // そして、バーが100%になったら「他の人の読み込みを待っています」を出す準備をする。
+        if (loadingOperation.isDone)
+        {
+            loadingOperation = null;
+            ShowWaitNoticeWhenBarFilledAsync().Forget();
+        }
+    }
+
+    /// <summary>
+    /// 自分の読み込みが終わった後に呼ぶ。バーが100%まで伸びきったときに、
+    /// まだ「明るくする」段階に入っていなければ(=他の人の読み込みが終わっていなければ)、
+    /// 「他の人の読み込みを待っています」を出す。消すのは FadeInAtAsync。
+    /// </summary>
+    private async UniTaskVoid ShowWaitNoticeWhenBarFilledAsync()
+    {
+        // ローディング表示を出していないなら(設定がOFF、遷移の途中で参加した人など)、お知らせも出さない
+        if (!isWaitingForFadeIn) return;
+
+        SceneLoader loader = SceneLoader.Instance;
+        CancellationToken ct = transitionCts.Token;
+
+        // バーが100%まで伸びきるのを待つ(途中で「明るくする」段階に入ったら、そこでやめる)
+        await UniTask.WaitUntil(() => loader.IsLoadingBarFilled || !isWaitingForFadeIn, cancellationToken: ct);
+        if (!isWaitingForFadeIn) return;
+
+        LoadingWaitNotice waitNotice = loader.GetComponent<LoadingWaitNotice>();
+        if (waitNotice != null) waitNotice.Show(WaitingForOthersNotice);
     }
 
     private void OnNetworkStopped(bool wasHost)
@@ -221,6 +318,9 @@ public class NetworkSceneTransition : MonoBehaviour
 
             SendToClients(FadeOutMessage, GetConnectedClientIdsExceptHost(), fadeOutDuration);
             await loader.FadeOutAsync(fadeOutDuration, ct);
+
+            // 暗くなったので、ローディング表示を出す
+            ShowLoading(loader);
 
             // ---------- 2. 全員から「暗くなった」が来るまで待つ(上限あり) ----------
             float waitStart = Time.realtimeSinceStartup;
@@ -306,8 +406,15 @@ public class NetworkSceneTransition : MonoBehaviour
 
     private async UniTask FadeInEveryoneAsync(SceneLoader loader, CancellationToken ct)
     {
-        SendToClients(FadeInMessage, GetConnectedClientIdsExceptHost(), fadeInDuration);
-        await loader.FadeInAsync(fadeInDuration, ct);
+        // 全員が明るくし始める時刻(サーバー時刻)を決める。
+        // 今すぐではなく、「各自がローディング表示を締めくくる時間」と「メッセージが届くまでの時間」の分だけ先にする。
+        float delay = fadeInNetworkMargin;
+        if (useLoadingIndicator) delay += loadingFinishSeconds;
+        double fadeInStartTime = networkManager.ServerTime.Time + delay;
+
+        // 参加者に「明るくして」を送り、自分(ホスト)も同じ時刻に明るくする
+        SendFadeInToClients(fadeInDuration, fadeInStartTime);
+        await FadeInAtAsync(loader, fadeInDuration, fadeInStartTime, ct);
     }
 
     private void OnFadeOutDoneReceived(ulong senderClientId, FastBufferReader reader)
@@ -344,6 +451,9 @@ public class NetworkSceneTransition : MonoBehaviour
             isClientFadingOut = false;
         }
 
+        // 暗くなったので、ローディング表示を出す
+        ShowLoading(SceneLoader.Instance);
+
         // 暗くなったことをホストに知らせる。途中で切断していたら送れないので送らない。
         if (networkManager.IsConnectedClient)
         {
@@ -361,7 +471,8 @@ public class NetworkSceneTransition : MonoBehaviour
         if (!isFadedOutByNetwork || myFadeOutNumber != clientFadeOutCount) return;
 
         Debug.LogWarning("[NetworkSceneTransition] ホストから「明るくして」が来ないため、自分で明るくします");
-        ClientFadeInAsync(fadeInDuration).Forget();
+        // 時刻は0(=もう過ぎている)を渡して、待たずにすぐ明るくする
+        ClientFadeInAsync(fadeInDuration, 0).Forget();
     }
 
     private void OnDisbandReceived(ulong senderClientId, FastBufferReader reader)
@@ -370,17 +481,28 @@ public class NetworkSceneTransition : MonoBehaviour
 
         // この後すぐにホストから切断される。切断されたとき(OnNetworkStopped)に文言を選ぶために覚えておく。
         hostDisbanded = true;
+
+        // ホストの切断を待たずに、自分からタイトルに戻り始める。
+        // ホストが切断しても、通信の状態によっては参加者側で「切断された」がすぐに分からず
+        // (Relayからの切断の知らせが届かない等)、その参加者だけミニゲームの画面に取り残されることがあるため。
+        // ここで戻り始めれば isLeaving が立つので、後から切断が分かっても OnNetworkStopped で二重には動かない。
+        Debug.Log($"[NetworkSceneTransition] {HostDisbandedNotice.Replace("\n", "")}");
+        ReturnToTitleAsync(HostDisbandedNotice).Forget();
     }
 
     private void OnFadeInReceived(ulong senderClientId, FastBufferReader reader)
     {
         if (networkManager.IsServer) return;
 
+        // 書き込んだ順番(フェードの秒数 → 明るくし始めるサーバー時刻)と同じ順番で読む
         reader.ReadValueSafe(out float duration);
-        ClientFadeInAsync(duration).Forget();
+        reader.ReadValueSafe(out double fadeInStartTime);
+        ClientFadeInAsync(duration, fadeInStartTime).Forget();
     }
 
-    private async UniTaskVoid ClientFadeInAsync(float duration)
+    /// <param name="duration">フェードインの秒数</param>
+    /// <param name="fadeInStartTime">明るくし始めるサーバー時刻。ホストから届いたもの</param>
+    private async UniTaskVoid ClientFadeInAsync(float duration, double fadeInStartTime)
     {
         // ホストに言われて暗くしていないなら(遷移の途中で参加した人など)、明るくする必要はない
         if (!isFadedOutByNetwork) return;
@@ -391,7 +513,9 @@ public class NetworkSceneTransition : MonoBehaviour
         // フェードアウトの途中なら、それが終わってから明るくする
         // (同時に動かすと、後から終わったフェードアウトで真っ黒のまま止まってしまう)
         await UniTask.WaitWhile(() => isClientFadingOut, cancellationToken: ct);
-        await SceneLoader.Instance.FadeInAsync(duration, ct);
+
+        // ホストが決めた時刻に、ホストや他の参加者とそろって明るくする
+        await FadeInAtAsync(SceneLoader.Instance, duration, fadeInStartTime, ct);
     }
 
     // ============================== タイトルに戻る ==============================
@@ -477,10 +601,73 @@ public class NetworkSceneTransition : MonoBehaviour
         // タイトルが見える前に、お知らせを消す
         if (screenNotice != null) screenNotice.Hide();
 
+        // 遷移の途中(ローディング表示が出ている間)に戻ってきた場合、表示が出たままになっているので消す
+        // (「他の人の読み込みを待っています」も一緒に消す)
+        isWaitingForFadeIn = false;
+        HideWaitNotice(loader);
+        loader.HideLoadingIndicator();
+
         await loader.FadeInAsync(fadeIn, ct);
     }
 
     // ============================== 共通 ==============================
+
+    /// <summary>
+    /// 暗くなった後に呼ぶ。設定(useLoadingIndicator)がONのときだけ、ローディング表示を出す。
+    /// </summary>
+    private void ShowLoading(SceneLoader loader)
+    {
+        if (!useLoadingIndicator) return;
+
+        loader.ShowLoadingIndicator();
+
+        // ここから「明るくする」段階に入るまでの間に、バーが100%になったら「他の人を待っています」を出す
+        isWaitingForFadeIn = true;
+    }
+
+    /// <summary>「他の人の読み込みを待っています」を消す。出していなければ何もしない</summary>
+    private static void HideWaitNotice(SceneLoader loader)
+    {
+        LoadingWaitNotice waitNotice = loader.GetComponent<LoadingWaitNotice>();
+        if (waitNotice != null) waitNotice.Hide();
+    }
+
+    /// <summary>
+    /// 明るくする前に呼ぶ。ローディング表示を締めくくってから消す
+    /// (バーを100%まで伸ばす → 100%を少し見せる → 暗転 → 非表示)。
+    /// 表示を出していなければ、待たずにすぐ終わる。
+    /// </summary>
+    private static async UniTask EndLoadingAsync(SceneLoader loader, CancellationToken ct)
+    {
+        await loader.FinishLoadingIndicatorAsync(ct);
+        loader.HideLoadingIndicator();
+    }
+
+    /// <summary>
+    /// 決められたサーバー時刻に明るくする。ホストも参加者もこれを使うので、全員の画面が同時に見え始める。
+    /// (サーバー時刻はNetcodeが全員の端末でそろえている時計なので、同じ時刻を渡せば同じ瞬間になる)
+    /// </summary>
+    /// <param name="duration">フェードインの秒数</param>
+    /// <param name="fadeInStartTime">明るくし始めるサーバー時刻。もう過ぎていたら待たずにすぐ明るくする</param>
+    private async UniTask FadeInAtAsync(SceneLoader loader, float duration, double fadeInStartTime, CancellationToken ct)
+    {
+        // 0. 全員の読み込みが終わったので、「他の人の読み込みを待っています」を消す
+        isWaitingForFadeIn = false;
+        HideWaitNotice(loader);
+
+        // 1. ローディング表示を締めくくって消す(この間も、この後も、画面は真っ暗なまま)
+        await EndLoadingAsync(loader, ct);
+
+        // 2. 決められた時刻まで待つ。真っ暗なので、待っている間は何も見えない。
+        //    (ローディングの締めくくりが早く終わった人ほど長く待つことになり、全員の足並みがそろう)
+        //    途中で切断された場合は時計が使えなくなるので、待つのをやめる
+        await UniTask.WaitUntil(
+            () => networkManager.ServerTime.Time >= fadeInStartTime || !networkManager.IsListening,
+            cancellationToken: ct);
+
+        // 3. 明るくする
+        await loader.FadeInAsync(duration, ct);
+    }
 
     /// <summary>接続している人のうち、ホスト自身を除いたIDの一覧</summary>
     private List<ulong> GetConnectedClientIdsExceptHost()
@@ -504,5 +691,23 @@ public class NetworkSceneTransition : MonoBehaviour
         using var writer = new FastBufferWriter(sizeof(float), Allocator.Temp);
         writer.WriteValueSafe(duration);
         networkManager.CustomMessagingManager.SendNamedMessage(messageName, clientIds, writer);
+    }
+
+    /// <summary>
+    /// 参加者たちに「明るくして」を送る。
+    /// 中身はフェードの秒数と、明るくし始めるサーバー時刻(全員が同じ瞬間に明るくするため)。
+    /// 受け取る側(OnFadeInReceived)は、ここで書き込んだ順番と同じ順番で読むこと。
+    /// </summary>
+    private void SendFadeInToClients(float duration, double fadeInStartTime)
+    {
+        List<ulong> clientIds = GetConnectedClientIdsExceptHost();
+
+        // 送る相手がいない(ホスト1人だけ)ときに送ると、Netcodeがエラーを出すので送らない
+        if (clientIds.Count == 0) return;
+
+        using var writer = new FastBufferWriter(sizeof(float) + sizeof(double), Allocator.Temp);
+        writer.WriteValueSafe(duration);
+        writer.WriteValueSafe(fadeInStartTime);
+        networkManager.CustomMessagingManager.SendNamedMessage(FadeInMessage, clientIds, writer);
     }
 }
