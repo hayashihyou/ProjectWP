@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 /// シーン名をまとめて置く場所。
 ///
 /// シーン名を各スクリプトに直接 "02_PlayerJoin" のように書くと、シーンの名前を変えたときに
@@ -29,6 +29,9 @@ public static class SceneNames
 
     /// <summary>カメラの中心に映れ</summary>
     public const string CameraCenter = "MG_CameraCenter";
+
+    /// <summary>ミニゲーム共通のリザルトUI。各ミニゲームのシーンに重ねて読み込む(MinigameResultUILoader)</summary>
+    public const string MinigameResult = "MinigameResult"; 
 
 
     ///<summary>ミニゲームの一覧(一覧画面の並び順や「もう一度」の判定に使う)</summary>

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Netcode;
 
 /// <summary>
@@ -17,6 +17,13 @@ public class PlayerSpawnPoints : MonoBehaviour
 {
     [Tooltip("1P〜4Pの順に、そのシーンでの初期位置。向きもこのTransformの向きに合わせる")]
     [SerializeField] private Transform[] spawnPoints = new Transform[PlayerSlotManager.SlotCount];
+
+    [Header("向き")]
+    [Tooltip("オンにすると、初期位置のTransformの向きではなく、カメラの方を向いて立つ(左右の向きだけ。見上げ/見下ろしはしない)")]
+    [SerializeField] private bool faceCamera = false;
+
+    [Tooltip("向く先のカメラ。空のときはメインカメラ(MainCameraタグのカメラ)を使う")]
+    [SerializeField] private Camera targetCamera;
 
     private void Start()
     {
@@ -38,7 +45,29 @@ public class PlayerSpawnPoints : MonoBehaviour
             int slot = player.SlotIndex;
             if (slot < 0 || slot >= spawnPoints.Length || spawnPoints[slot] == null) continue;
 
-            player.MoveTo(spawnPoints[slot].position, spawnPoints[slot].rotation);
+            Vector3 position = spawnPoints[slot].position;
+            player.MoveTo(position, GetStandRotation(position, spawnPoints[slot].rotation));
         }
+    }
+
+    /// <summary>
+    /// その位置に立つときの向きを返す。
+    /// faceCameraがオフ、またはカメラが見つからないときは、初期位置のTransformの向き(fallback)をそのまま使う。
+    /// </summary>
+    private Quaternion GetStandRotation(Vector3 standPosition, Quaternion fallback)
+    {
+        if (!faceCamera) return fallback;
+
+        Camera cam = targetCamera != null ? targetCamera : Camera.main;
+        if (cam == null) return fallback;
+
+        // 高さ(Y)をそろえて、左右の向きだけカメラに合わせる(体が前後に傾かないように)
+        Vector3 toCamera = cam.transform.position - standPosition;
+        toCamera.y = 0f;
+
+        // カメラの真上/真下に立っているとLookRotationの向きが決まらないので、念のためガード
+        if (toCamera.sqrMagnitude < 0.0001f) return fallback;
+
+        return Quaternion.LookRotation(toCamera);
     }
 }
