@@ -27,7 +27,7 @@ public class PlayerSlot : NetworkBehaviour
     private Color[] slotColors =
     {
         Color.white,                    // 1P: 変更なし
-        new Color(1f, 0.55f, 0f),       // 2P: オレンジ
+        new Color(0.75f, 0.6f, 1f),     // 2P: 明るい紫
         new Color(0.4f, 0.9f, 1f),      // 3P: 水色
         new Color(0.6f, 1f, 0.2f),      // 4P: 黄緑
     };
