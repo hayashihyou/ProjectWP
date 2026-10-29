@@ -50,6 +50,9 @@ public class MinigameIntroCamera : MonoBehaviour
     private bool waitingForIntro;
 
 
+    /// <summary>演出が始まってから、モニターを映す位置に着くまでの秒数(モニター未設定なら、流れ終わるまで)</summary>
+    public float MonitorArriveSeconds => monitor != null ? panSeconds + toMonitorSeconds : panSeconds;
+
     /// <summary>演出全体の秒数。サーバーの Intro Seconds はこれより 0.5秒ほど長くする</summary>
     public float TotalSeconds => monitor != null
         ? panSeconds + toMonitorSeconds + monitorHoldSeconds + returnSeconds

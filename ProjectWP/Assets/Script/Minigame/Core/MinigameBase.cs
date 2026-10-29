@@ -71,6 +71,10 @@ public abstract class MinigameBase : NetworkBehaviour
     [ShowIf(nameof(fadeOnRoundReset))]
     [SerializeField] private bool fadeAfterLastRound = true;
 
+    [Tooltip("ゲーム終了演出の後、リザルトの前にも暗くして、明るくなったらリザルト画面になっている(暗い間にフェーズが Result になる)")]
+    [ShowIf(nameof(fadeOnRoundReset))]
+    [SerializeField] private bool fadeBeforeResult = true;
+
     [Tooltip("オン = 少しずつ暗くする。オフ = 一瞬で暗くする")]
     [ShowIf(nameof(fadeOnRoundReset))]
     [SerializeField] private bool resetFadeOut = true;
@@ -90,6 +94,9 @@ public abstract class MinigameBase : NetworkBehaviour
     // 位置を戻してから明るくするまでに待つ秒数。
     // キャラクターの位置は所有者の端末が動かして全員に配るので、移動が全員の画面に届くのを少し待つ
     private const float ResetMoveSettleSeconds = 0.5f;
+
+    // リザルトの前に暗くしたとき、背景(カメラ移動・ぼかし)ができるのを待つ最大の秒数
+    private const float ResultBackgroundMaxWaitSeconds = 3f;
 
 
     // 今のフェーズ。サーバーだけが書き換え、全員が値を読める
@@ -222,10 +229,35 @@ public abstract class MinigameBase : NetworkBehaviour
         ServerSetPhase(MinigamePhase.GameEnd); // 暗くする設定のときは、もう GameEnd になっている(同じ値なら何も起きない)
         await OnServerGameEndAsync(ct);
 
+        // リザルトの前も暗くする設定なら、暗い間にリザルトにして、背景ができてから明るくする
+        bool fadeToResult = fadeOnRoundReset && fadeBeforeResult;
+        if (fadeToResult)
+        {
+            await ServerFadeOutAsync(ct);
+        }
+
         // 順位を計算して全員に送る
         List<MinigameRankEntry> ranking = CalculateRanking();
         ResultRpc(ranking.ToArray());
         ServerSetPhase(MinigamePhase.Result);
+
+        if (fadeToResult)
+        {
+            await ServerWaitResultBackgroundAsync(ct);
+            await ServerFadeInAsync(ct);
+        }
+    }
+
+    // リザルトの背景(MinigameResultBackground)のカメラ移動・ぼかしが終わるまで待つ(サーバーで呼ばれる)
+    // 背景がないシーンでは IsReady にならないので、ResultBackgroundMaxWaitSeconds 秒で待つのをやめる
+    private async UniTask ServerWaitResultBackgroundAsync(CancellationToken ct)
+    {
+        float waited = 0f;
+        while (!MinigameResultBackground.IsReady && waited < ResultBackgroundMaxWaitSeconds)
+        {
+            await UniTask.Yield(ct);
+            waited += Time.deltaTime;
+        }
     }
 
     // シーン遷移(NetworkSceneTransition)のフェードインが終わるまで待つ(サーバーで呼ばれる)

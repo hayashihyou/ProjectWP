@@ -29,6 +29,7 @@ public class StopwatchDisplay : MonoBehaviour
         Stopped,    // ストップした(縁が光っている)
         TimedOut,   // 押さないまま時間切れになった
         RoundOver,  // ラウンドが終わった(止めた時間を見せてよいタイミング)
+        GameOver,   // 全ラウンドが終わった(合計の誤差を見せる)
     }
 
     [Header("どのプレイヤーの机か")]
@@ -118,8 +119,10 @@ public class StopwatchDisplay : MonoBehaviour
         get
         {
             if (State != DisplayState.Running) { return false; }
+            // スタートの合図(RPC)は、経過時間の同期より先に届くことがある。そのときは -1 になるが、
+            // まだ始まったばかりなので「見せてよい」とする(false にすると、始まった瞬間に隠れてしまう)
             float elapsed = MinigameInfo.ElapsedTime;
-            return elapsed >= 0f && elapsed < visibleSecondsAtStart;
+            return elapsed < visibleSecondsAtStart;
         }
     }
 
@@ -144,6 +147,9 @@ public class StopwatchDisplay : MonoBehaviour
 
     /// <summary>ラウンドが終わった(このストップウォッチ, 止めた秒数。まだ届いていなければ -1)。止めた時間を見せるきっかけ</summary>
     public event Action<StopwatchDisplay, float> OnRoundOver;
+
+    /// <summary>全ラウンドが終わった(このストップウォッチ, 合計の誤差)。合計の誤差を見せるきっかけ</summary>
+    public event Action<StopwatchDisplay, float> OnGameOver;
 
 
     // ==================== 状態を変えるメソッド(StopwatchDeskDisplays が呼ぶ) ====================
@@ -194,6 +200,15 @@ public class StopwatchDisplay : MonoBehaviour
     {
         ChangeState(DisplayState.RoundOver);
         OnRoundOver?.Invoke(this, StoppedSeconds);
+    }
+
+    /// <summary>全ラウンドが終わった。光を消して、合計の誤差を見せる状態にする</summary>
+    public void EndGame(float totalError)
+    {
+        StopEffect();
+        SetEmission(0f, false);
+        ChangeState(DisplayState.GameOver);
+        OnGameOver?.Invoke(this, totalError);
     }
 
 
