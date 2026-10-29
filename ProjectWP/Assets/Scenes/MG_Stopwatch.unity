@@ -420,6 +420,7 @@ GameObject:
   - component: {fileID: 639992136}
   - component: {fileID: 639992139}
   - component: {fileID: 639992140}
+  - component: {fileID: 639992141}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -567,6 +568,23 @@ MonoBehaviour:
   toMonitorSeconds: 1.2
   monitorHoldSeconds: 1
   returnSeconds: 2
+--- !u!114 &639992141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639992135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6932641c64dcff442ab22c47445fd85c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StopwatchRoundCamera
+  screen: {fileID: 4776426152952297549}
+  zoomDistance: 5
+  targetDelaySeconds: 0.4
+  holdSeconds: 1
+  returnSeconds: 1.5
 --- !u!134 &1052254683
 PhysicsMaterial:
   m_ObjectHideFlags: 0
@@ -1168,7 +1186,7 @@ MonoBehaviour:
   countdownSeconds: 0
   introSeconds: 5
   roundIntroSeconds: 2
-  roundEndSeconds: 3
+  roundEndSeconds: 5
   gameEndSeconds: 3
   totalRounds: 3
   roundTimeLimit: 30
@@ -1186,8 +1204,10 @@ MonoBehaviour:
   resetFadeOutSeconds: 0.3
   resetFadeIn: 1
   resetFadeInSeconds: 0.3
-  minTargetSeconds: 5
+  minTargetSeconds: 7.5
   maxTargetSeconds: 15
+  targetStepSeconds: 0.5
+  startDelaySeconds: 2
 --- !u!1 &4100000001
 GameObject:
   m_ObjectHideFlags: 0

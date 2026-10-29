@@ -11,11 +11,12 @@ using UnityEngine;
 ///   (このスクリプトに NetworkObject は不要。全員の端末で同じように動く)
 ///
 /// 流れとストップウォッチの状態
-///   ラウンド開始演出(RoundIntro) → PrepareRound … 待機に戻す・光を消す
+///   次のラウンドの準備(RoundReset)・ラウンド開始演出(RoundIntro) → PrepareRound … 待機に戻す・光を消す
 ///   プレイ開始(OnRoundStarted)   → StartRunning  … 計測中
 ///   「ストップ」の出来事          → Stop          … その人の机だけ光る
 ///   「時間切れ」の出来事          → TimeUp        … 押さなかった人(ラウンド終了の直後に届く)
 ///   ラウンド終了(OnRoundEnded)   → EndRound      … 止めた時間を見せてよいタイミング(時間切れが届くのを2フレーム待ってから)
+///   ゲーム終了演出(GameEnd)       → EndGame       … 合計の誤差を見せる(最後のラウンドの後、画面が暗い間に切り替わる)
 /// </summary>
 public class StopwatchDeskDisplays : MonoBehaviour
 {
@@ -67,16 +68,34 @@ public class StopwatchDeskDisplays : MonoBehaviour
         MinigameInfo.OnCustomEvent -= HandleCustomEvent;
     }
 
-    // ラウンド開始演出になったら、全部の机を待機に戻す
+    // 次のラウンドの準備(画面が暗い間)と、ラウンド開始演出になったら、全部の机を待機に戻す
+    // (暗い間に戻しておくと、明るくなったときにはもう 0:00 になっている。1ラウンド目は暗転がないので、ラウンド開始演出で戻す)
     private void HandlePhaseChanged(MinigamePhase phase, int round)
     {
-        if (phase != MinigamePhase.RoundIntro) { return; }
+        // 最後のラウンドの後(画面が暗い間に GameEnd になる)は、合計の誤差に切り替える
+        if (phase == MinigamePhase.GameEnd)
+        {
+            ShowTotals();
+            return;
+        }
+
+        if (phase != MinigamePhase.RoundReset && phase != MinigamePhase.RoundIntro) { return; }
 
         foreach (StopwatchDisplay d in displays.Values)
         {
             // その枠にプレイヤーがいるか(2人で遊ぶときの 3P・4P の机などは false になる)
             bool occupied = MinigameInfo.TryGetPlayerBySlot(d.SlotIndex, out _);
             d.PrepareRound(occupied);
+        }
+    }
+
+    // プレイヤーがいる机に、その人の合計の値(= 3ラウンドの誤差の合計)を出す
+    private void ShowTotals()
+    {
+        foreach (StopwatchDisplay d in displays.Values)
+        {
+            if (!MinigameInfo.TryGetPlayerBySlot(d.SlotIndex, out MinigamePlayerState player)) { continue; }
+            d.EndGame(player.TotalValue);
         }
     }
 

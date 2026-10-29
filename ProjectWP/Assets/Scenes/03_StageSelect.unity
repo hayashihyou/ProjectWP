@@ -194,7 +194,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -751,6 +751,14 @@ PrefabInstance:
       propertyPath: m_text
       value: "\u9023\u7D9A\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
       objectReference: {fileID: 0}
+    - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4293326847
+      objectReference: {fileID: 0}
+    - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 1698430684761946128, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Interactable
       value: 1
@@ -855,6 +863,46 @@ PrefabInstance:
       propertyPath: minigameSelectManager
       value: 
       objectReference: {fileID: 294840370}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7209595229300040618, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7209595229300040618, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8911188977788746516, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Name
       value: Pin_Stopwatch
@@ -1713,6 +1761,14 @@ PrefabInstance:
       propertyPath: m_text
       value: "\u30AB\u30E1\u30E9\u306E\u4E2D\u5FC3\u306B\u5199\u308C\n(\u6E96\u5099\u4E2D)"
       objectReference: {fileID: 0}
+    - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4293326847
+      objectReference: {fileID: 0}
+    - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 4580714704292542124, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1805,6 +1861,46 @@ PrefabInstance:
       propertyPath: minigameSelectManager
       value: 
       objectReference: {fileID: 294840370}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7209595229300040618, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7209595229300040618, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8911188977788746516, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Name
       value: Pin_CameraCenter
@@ -1874,6 +1970,14 @@ PrefabInstance:
     - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_text
       value: "\u30D1\u30A4\u6295\u3052\n(\u6E96\u5099\u4E2D)"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4293326847
+      objectReference: {fileID: 0}
+    - target: {fileID: 1260430925946666716, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 4580714704292542124, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Pivot.x
@@ -1967,6 +2071,46 @@ PrefabInstance:
       propertyPath: minigameSelectManager
       value: 
       objectReference: {fileID: 294840370}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6676356173355675868, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7209595229300040618, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7209595229300040618, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8911188977788746516, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Name
       value: Pin_PieThrow
