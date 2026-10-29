@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 
@@ -15,10 +16,16 @@ public class MinigameSelectButton : MonoBehaviour
     [SerializeField] private MinigameType minigameType;
 
     [Header("遷移先のシーン名(Build Settingsに登録されている名前と完全一致させる)")]
-    [SerializeField]　private string sceneName;
+    [SerializeField] private string sceneName;
 
     [Header("遊べるミニゲームかどうか。オフにすると押せなくなる")]
     [SerializeField] private bool isAvailable = true;
+
+    [Header("●を選んだときに出すミニゲームの名前")]
+    [SerializeField] private string displayName;
+
+    [Header("名前を表示するテキスト(このプレハブの子の吹き出しの中)")]
+    [SerializeField] private TMP_Text nameText;
 
 
     private Button button; // ボタンコンポーネント
@@ -30,21 +37,24 @@ public class MinigameSelectButton : MonoBehaviour
         button = GetComponent<Button>();
         button.interactable = isAvailable;
         button.onClick.AddListener(OnClicked);
+
+        // ●の上の吹き出しに名前を入れる(遊べないものは「準備中」をつける)
+        if (nameText != null) { nameText.text = isAvailable ? displayName : displayName + "\n(準備中)"; }
     }
 
     private void OnDestroy()
     {
-       button.onClick.RemoveListener(OnClicked);
+        button.onClick.RemoveListener(OnClicked);
     }
 
 
+    // クリック・タップ・Aボタンで決定したとき
     private void OnClicked()
     {
-        if(!isAvailable)
+        if (!isAvailable)
         {
             return;
         }
-
 
         minigameSelectManager.StartMinigame(minigameType, sceneName);
     }
