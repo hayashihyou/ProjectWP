@@ -89,5 +89,4 @@ public class MinigameSelectManager : MonoBehaviour
             SceneLoader.Instance.LoadSceneAsync(sceneName, useFade: true).Forget();
         }
     }
-
 }
