@@ -36,6 +36,9 @@ public class StartTextBlink : MonoBehaviour
     [SerializeField] private KeyCode exitKey = KeyCode.Return;
     [Tooltip("ONにすると何のキーでも反応する (上のキー指定は無視)")]
     [SerializeField] private bool useAnyKey = false;
+    [Tooltip("OFFにすると、このスクリプトはキー入力を見ない。\n" +
+         "外のスクリプトから StartExit() を呼んでフェードアウトさせる(タイトルシーンでは ServerListUI が呼ぶ)")]
+    [SerializeField] private bool listenInput = true;
     [SerializeField] private float exitFadeDuration = 0.5f;
 
     [Header("イベント")]
@@ -63,6 +66,9 @@ public class StartTextBlink : MonoBehaviour
 
     private void Update()
     {
+        // 入力を外に任せている場合は、ここではキーを見ない
+        // (このプロジェクトは Input System だけを使う設定なので、古い Input を読むとエラーになる)
+        if (!listenInput) return;
         if (!IsPlaying || IsExiting) return;
 
         bool pressed = useAnyKey ? Input.anyKeyDown : Input.GetKeyDown(exitKey);

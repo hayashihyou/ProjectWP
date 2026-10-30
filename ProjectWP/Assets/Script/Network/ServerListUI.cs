@@ -39,6 +39,13 @@ public class ServerListUI : MonoBehaviour
 
     [SerializeField] private Button startButton;
 
+    [Header("タイトル演出(TitleUIプレハブの中のもの)")]
+    [Tooltip("TitleUI > Canvas に付いている TitleSequenceController")]
+    [SerializeField] private TitleSequenceController titleSequence;
+
+    [Tooltip("TitleUI > Canvas > TitleStartText に付いている StartTextBlink")]
+    [SerializeField] private StartTextBlink startTextBlink;
+
     [Header("サーバーの行(上から Server 1, 2, 3 の順で並べる)")]
     [SerializeField] private Button[] serverRowButtons = new Button[3];
     [SerializeField] private TextMeshProUGUI[] serverRowLabels = new TextMeshProUGUI[3];
@@ -58,6 +65,9 @@ public class ServerListUI : MonoBehaviour
         // 「Start」ボタンはクリックでも押せるようにしておく(マウス操作用)。
         // それとは別に、下のShowTitlePanel()で「何かボタンを押したら進む」も仕込む。
         if (startButton != null) startButton.onClick.AddListener(OnStartButtonClicked);
+
+        // 「はじめる」が消え終わったら、サーバー選択画面に切り替える
+        if (titleSequence != null) titleSequence.onSequenceCompleted.AddListener(OnStartButtonClicked);
 
         for (int i = 0; i < serverRowButtons.Length; i++)
         {
@@ -85,12 +95,28 @@ public class ServerListUI : MonoBehaviour
 
     private void OnAnyButtonPressedOnTitle(InputControl control)
     {
+        // ロゴの演出中(まだ「はじめる」が出ていない)に押されたときは進まず、もう一度待ち直す
+        if (startTextBlink != null && !startTextBlink.IsPlaying)
+        {
+            InputSystem.onAnyButtonPress.CallOnce(OnAnyButtonPressedOnTitle);
+            return;
+        }
+
         if (LocalInputDeviceService.Instance != null)
         {
             LocalInputDeviceService.Instance.SetChosenDevice(control.device);
         }
 
-        OnStartButtonClicked();
+        // 「はじめる」をフェードアウトさせる。
+        // 消え終わると titleSequence.onSequenceCompleted が呼ばれ、OnStartButtonClicked でサーバー選択画面に切り替わる
+        if (startTextBlink != null)
+        {
+            startTextBlink.StartExit();
+        }
+        else
+        {
+            OnStartButtonClicked();
+        }
     }
 
     private async void OnStartButtonClicked()
