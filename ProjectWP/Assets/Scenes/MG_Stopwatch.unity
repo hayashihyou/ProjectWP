@@ -283,6 +283,7 @@ GameObject:
   m_Component:
   - component: {fileID: 218798682}
   - component: {fileID: 218798690}
+  - component: {fileID: 218798691}
   m_Layer: 0
   m_Name: StopwatchDesks
   m_TagString: Untagged
@@ -321,6 +322,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d56db063144a8a988e471d4f6d5b1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &218798691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 218798681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e75594600b436843a9b162bf3496e5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StopwatchSounds
+  targetShowId: Stopwatch_TargetShow
+  stopId: Stopwatch_Stop
+  tickId: Stopwatch_Tick
+  revealBeforeId: Stopwatch_RevealBefore
+  revealId: Stopwatch_Reveal
+  revealBeforeLead: 0.8
+  totalRevealDelay: 0.6
 --- !u!134 &607033023
 PhysicsMaterial:
   m_ObjectHideFlags: 0
@@ -1192,6 +1212,9 @@ MonoBehaviour:
   roundTimeLimit: 30
   roundAggregation: 0
   rankPoints: 03000000020000000100000000000000
+  startSoundId: Common_Start
+  finishSoundId: Common_Finish
+  timeUpSoundId: Common_TimeUp
   ignoreActionsAfterFinished: 1
   winOrder: 1
   valueKind: 1
@@ -1200,6 +1223,7 @@ MonoBehaviour:
   spawnPoints: {fileID: 0}
   fadeOnRoundReset: 1
   fadeAfterLastRound: 1
+  fadeBeforeResult: 1
   resetFadeOut: 1
   resetFadeOutSeconds: 0.3
   resetFadeIn: 1

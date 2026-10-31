@@ -30,6 +30,9 @@ public class StopwatchTimeView : MonoBehaviour
     [Tooltip("ラウンドが終わってから、カバーを外すまでの秒数(Finish! の演出の長さに合わせる)")]
     [SerializeField] private float revealDelay = 1.8f;
 
+    /// <summary>ラウンドが終わってから、カバーを外す(= 止めた時間を見せる)までの秒数。音を合わせるのに使う</summary>
+    public float RevealDelay => revealDelay;
+
     private StopwatchDisplay display;
 
     // カバーのマテリアル(実行中だけ使う複製。共有のマテリアルを変えると、他の机のカバーまで変わるため)

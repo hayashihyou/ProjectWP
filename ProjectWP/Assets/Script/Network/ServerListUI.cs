@@ -107,6 +107,9 @@ public class ServerListUI : MonoBehaviour
             LocalInputDeviceService.Instance.SetChosenDevice(control.device);
         }
 
+        // 「はじめる」で押したときの決定音(ボタンではないので ButtonSound は付かない)
+        SoundManager.Instance.PlaySe(ButtonSound.DefaultDecideId);
+
         // 「はじめる」をフェードアウトさせる。
         // 消え終わると titleSequence.onSequenceCompleted が呼ばれ、OnStartButtonClicked でサーバー選択画面に切り替わる
         if (startTextBlink != null)

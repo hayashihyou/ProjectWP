@@ -32,6 +32,10 @@ public class PlayerSlot : NetworkBehaviour
         new Color(0.6f, 1f, 0.2f),      // 4P: 黄緑
     };
 
+    // 参加・退出のときに鳴らす音(SoundLibrary のID)
+    private const string JoinSoundId = "Common_PlayerJoin";
+    private const string LeaveSoundId = "Common_PlayerLeave";
+
     // 自分がどの枠か(0=1P, 1=2P, ...)。-1はまだ割り当てられていない。
     private readonly NetworkVariable<int> slotIndex = new NetworkVariable<int>(-1);
 
@@ -69,6 +73,12 @@ public class PlayerSlot : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         slotIndex.OnValueChanged -= OnSlotIndexChanged;
+
+        // 誰かが抜けたら退出音(自分が切断したときは全員分が一斉に消えるので鳴らさない)
+        if (slotIndex.Value >= 0 && NetworkManager != null && !NetworkManager.ShutdownInProgress)
+        {
+            SoundManager.Instance.PlaySe(LeaveSoundId);
+        }
 
         if (!IsServer) return;
         if (slotIndex.Value < 0) return;
@@ -178,6 +188,13 @@ public class PlayerSlot : NetworkBehaviour
     private void OnSlotIndexChanged(int previousValue, int newValue)
     {
         ApplySlotColor(newValue);
+
+        // 枠が決まった = 待機画面に参加した。全員の画面で参加音を鳴らす
+        // (後から参加した人の画面では、もういる人の枠は最初から決まっているのでここに来ない = 鳴らない)
+        if (previousValue < 0 && newValue >= 0)
+        {
+            SoundManager.Instance.PlaySe(JoinSoundId);
+        }
     }
 
     private void ApplySlotColor(int index)

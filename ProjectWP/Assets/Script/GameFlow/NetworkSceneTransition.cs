@@ -222,6 +222,9 @@ public class NetworkSceneTransition : MonoBehaviour
         if (sceneEvent.ClientId != networkManager.LocalClientId) return;
 
         loadingOperation = sceneEvent.AsyncOperation;
+
+        // ローディングに入ったので、次のシーンの曲が違えば今の曲をフェードアウトさせる(ホスト・参加者どちらの端末でも来る)
+        SceneBgm.NotifyLoadStarted(sceneEvent.SceneName);
     }
 
     private void Update()
