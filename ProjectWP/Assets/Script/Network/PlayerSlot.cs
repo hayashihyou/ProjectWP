@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -40,6 +40,8 @@ public class PlayerSlot : NetworkBehaviour
     private readonly NetworkVariable<int> slotIndex = new NetworkVariable<int>(-1);
 
     public int SlotIndex => slotIndex.Value;
+
+    public Color SlotColor => SlotIndex >= 0 && SlotIndex < slotColors.Length ? slotColors[SlotIndex] : Color.white;
 
     private PlayerCharacterVisual visual;
     private NetworkTransform networkTransform;
