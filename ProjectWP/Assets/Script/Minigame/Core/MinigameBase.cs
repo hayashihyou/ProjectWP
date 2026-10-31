@@ -43,6 +43,16 @@ public abstract class MinigameBase : NetworkBehaviour
     [Tooltip("まとめ方が RankPoints のときの、順位ごとの勝ち点(1位, 2位, 3位, 4位 の順)")]
     [SerializeField] private int[] rankPoints = { 3, 2, 1, 0 };
 
+    [Header("共通の音(SoundLibrary のID。空欄 = 鳴らさない)")]
+    [Tooltip("プレイが始まった瞬間")]
+    [SerializeField] private string startSoundId = "Common_Start";
+
+    [Tooltip("ラウンドが終わった瞬間(時間切れ以外: 全員終わった・終了条件・ServerEndRound)")]
+    [SerializeField] private string finishSoundId = "Common_Finish";
+
+    [Tooltip("ラウンドが制限時間で終わった瞬間")]
+    [SerializeField] private string timeUpSoundId = "Common_TimeUp";
+
     [Header("操作")]
     [Tooltip("オン = このラウンドを終えた人(ServerSetFinished された人)の行動は受け付けない。1ラウンドに1回だけ押すゲーム向け(例: ストップウォッチ)。何度でも押すゲームで ServerSetFinished を使わないなら、オンのままでも影響はない")]
     [SerializeField] private bool ignoreActionsAfterFinished = true;
@@ -125,6 +135,9 @@ public abstract class MinigameBase : NetworkBehaviour
     // このオブジェクトに付いている終了条件(サーバーだけが使う)。どれか1つを満たすとラウンドが終わる
     private MinigameEndCondition[] endConditions;
 
+    // 今のラウンドが制限時間で終わったか(サーバーだけが使う。ラウンド終了の合図で全員に送る)
+    private bool serverRoundTimedUp;
+
     // 枠番号ごとの、各ラウンドの値の記録(サーバーだけが使う)。まとめ方が合計以外のときに、合計の値を計算し直すのに使う
     private readonly Dictionary<int, List<float>> roundValueHistory = new Dictionary<int, List<float>>();
 
@@ -192,13 +205,14 @@ public abstract class MinigameBase : NetworkBehaviour
             ServerSetPhase(MinigamePhase.RoundIntro);
             await OnServerRoundIntroAsync(round, ct);
 
+            serverRoundTimedUp = false;
             await ServerRunCountdownAsync(ct);
             RoundStartedRpc(round);
             OnServerRoundStart(round);
 
             // 時間切れ・終了条件・担当者の ServerEndRound() のどれかで Playing でなくなるまで待つ
             await UniTask.WaitUntil(() => Phase != MinigamePhase.Playing, cancellationToken: ct);
-            RoundEndedRpc(round);
+            RoundEndedRpc(round, serverRoundTimedUp);
             OnServerRoundEnd(round);
 
             // 担当者が OnServerRoundEnd で値を確定させた後に、このラウンドの値を記録して合計を出し直す
@@ -528,10 +542,24 @@ public abstract class MinigameBase : NetworkBehaviour
     // 「起きたこと」を確実に知らせたいものは RPC で送る
 
     [Rpc(SendTo.Everyone)]
-    private void RoundStartedRpc(int round) => MinigameInfo.RaiseRoundStarted(round);
+    private void RoundStartedRpc(int round)
+    {
+        PlaySound(startSoundId);
+        MinigameInfo.RaiseRoundStarted(round);
+    }
 
+    // timedUp : 制限時間で終わったか(フィニッシュとタイムアップで音・演出を分けるため)
     [Rpc(SendTo.Everyone)]
-    private void RoundEndedRpc(int round) => MinigameInfo.RaiseRoundEnded(round);
+    private void RoundEndedRpc(int round, bool timedUp)
+    {
+        PlaySound(timedUp ? timeUpSoundId : finishSoundId);
+        MinigameInfo.RaiseRoundEnded(round, timedUp);
+    }
+
+    private static void PlaySound(string id)
+    {
+        if (!string.IsNullOrEmpty(id)) { SoundManager.Instance.PlaySe(id); }
+    }
 
     [Rpc(SendTo.Everyone)]
     private void PlayerValueChangedRpc(int slot, float delta, float newValue) => MinigameInfo.RaisePlayerValueChanged(slot, delta, newValue);
@@ -1021,6 +1049,7 @@ public abstract class MinigameBase : NetworkBehaviour
         if (roundEndServerTime.Value >= 0 && NetworkManager.ServerTime.Time >= roundEndServerTime.Value)
         {
             Debug.Log("[MinigameBase] 時間切れ");
+            serverRoundTimedUp = true;
             ServerEndRound();
             return;
         }

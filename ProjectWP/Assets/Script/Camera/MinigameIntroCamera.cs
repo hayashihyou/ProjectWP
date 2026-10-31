@@ -40,6 +40,12 @@ public class MinigameIntroCamera : MonoBehaviour
     [Tooltip("定点位置に戻るまでの時間。長いほど戻る動きがゆっくり見える")]
     [SerializeField] private float returnSeconds = 2.0f;
 
+    [Header("音")]
+    [Tooltip("演出が始まったときに鳴らす音(SoundLibrary のID)。空欄なら鳴らさない。演出が途中で止められたら一緒に止める")]
+    [SerializeField] private string introSoundId = "Amb_Cheer";
+
+    private SoundHandle introSound;
+
     // 定点位置(シーンに置いたときのカメラの位置・向き)
     private Vector3 fixedPosition;
     private Quaternion fixedRotation;
@@ -98,6 +104,7 @@ public class MinigameIntroCamera : MonoBehaviour
                 waitingForIntro = false;
                 StopIntro();
                 introRoutine = StartCoroutine(PlayIntro());
+                if (!string.IsNullOrEmpty(introSoundId)) { introSound = SoundManager.Instance.PlaySe(introSoundId); }
                 break;
 
             case MinigamePhase.RoundIntro:
@@ -126,6 +133,7 @@ public class MinigameIntroCamera : MonoBehaviour
 
     private void StopIntro()
     {
+        introSound.Stop(0.5f); // 鳴り終わっていれば何も起きない
         if (introRoutine == null) return;
 
         StopCoroutine(introRoutine);

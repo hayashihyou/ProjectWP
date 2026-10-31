@@ -45,6 +45,10 @@ public class ReadyKeyController : MonoBehaviour
     [Tooltip("フェード完了から何秒後にスタートを表示するか")]
     [SerializeField, Min(0f)] private float startDelay = 0f;
 
+    [Header("音")]
+    [Tooltip("準備完了のときに鳴らす音(SoundLibrary のID)。空欄なら鳴らさない")]
+    [SerializeField] private string readySoundId = "Common_Ready";
+
     [Header("再生トリガー")]
     [Tooltip("キー入力で再生するか")]
     [SerializeField] private bool playOnKey = true;
@@ -111,6 +115,7 @@ public class ReadyKeyController : MonoBehaviour
         if (oneShot && triggered) return;
         triggered = true;
 
+        PlayReadySound();
         if (textSwitcher != null) textSwitcher.Play();
         if (punchScale != null) punchScale.Play();
         if (whiteFlash != null) whiteFlash.Play();
@@ -126,6 +131,9 @@ public class ReadyKeyController : MonoBehaviour
 
         pressCount++;
 
+        // 1人押すたびに(= 1人準備完了するたびに)鳴らす
+        PlayReadySound();
+
         // 押すたびのフィードバック(不要ならインスペクターでオフ)
         if (playFeedbackOnEachPress)
         {
@@ -140,6 +148,11 @@ public class ReadyKeyController : MonoBehaviour
             if (textSwitcher != null) textSwitcher.Play();
             if (fader != null) fader.Play();
         }
+    }
+
+    private void PlayReadySound()
+    {
+        if (!string.IsNullOrEmpty(readySoundId)) SoundManager.Instance.PlaySe(readySoundId);
     }
 
     /// <summary>フェード完了時に呼ばれる。担当のコントローラーだけがスタートを表示する</summary>

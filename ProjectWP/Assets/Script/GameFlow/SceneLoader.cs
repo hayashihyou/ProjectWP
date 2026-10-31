@@ -180,6 +180,9 @@ public class SceneLoader : MonoBehaviour
             // フェードで画面が覆われている（＝見えていない）間だけNow Loading的な表示を出す
             if (useLoadingIndicator) ShowLoadingIndicator();
 
+            // ローディングに入ったので、次のシーンの曲が違えば今の曲をフェードアウトさせる
+            SceneBgm.NotifyLoadStarted(sceneName);
+
             var op = SceneManager.LoadSceneAsync(sceneName);
             if (op == null)
             {

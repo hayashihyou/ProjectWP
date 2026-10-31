@@ -49,6 +49,9 @@ public static class MinigameInfo
     /// <summary>今のラウンドのプレイが始まってからの秒数。プレイ中でなければ -1。例: ストップウォッチの「0.00 → 1.23 → …」</summary>
     public static float ElapsedTime => IsActive ? current.ElapsedTime : -1f;
 
+    /// <summary>最後に終わったラウンドが、制限時間で終わったか(OnRoundEnded の中で読める)。例: 「タイムアップ!」を出すか「フィニッシュ!」を出すか</summary>
+    public static bool LastRoundTimedUp { get; private set; }
+
     /// <summary>プレイヤーの人数</summary>
     public static int PlayerCount => IsActive ? current.PlayerCount : 0;
 
@@ -249,7 +252,11 @@ public static class MinigameInfo
     internal static void RaisePhaseChanged(MinigamePhase phase, int round) => OnPhaseChanged?.Invoke(phase, round);
     internal static void RaiseCountdown(int secondsLeft) => OnCountdown?.Invoke(secondsLeft);
     internal static void RaiseRoundStarted(int round) => OnRoundStarted?.Invoke(round);
-    internal static void RaiseRoundEnded(int round) => OnRoundEnded?.Invoke(round);
+    internal static void RaiseRoundEnded(int round, bool timedUp)
+    {
+        LastRoundTimedUp = timedUp;
+        OnRoundEnded?.Invoke(round);
+    }
     internal static void RaisePlayerValueChanged(int slot, float delta, float newValue) => OnPlayerValueChanged?.Invoke(slot, delta, newValue);
     internal static void RaisePlayerFinished(int slot) => OnPlayerFinished?.Invoke(slot);
     internal static void RaisePlayerEliminated(int slot) => OnPlayerEliminated?.Invoke(slot);
