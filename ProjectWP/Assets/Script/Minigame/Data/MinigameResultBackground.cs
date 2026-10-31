@@ -49,6 +49,9 @@ public class MinigameResultBackground : MonoBehaviour
     [Tooltip("リザルト中に隠すオブジェクト(プレイ中のHUD・操作ボタンなど)")]
     [SerializeField] private GameObject[] hideOnResult = Array.Empty<GameObject>();
 
+    [Tooltip("オン = リザルトになったら、ステージの上のプレイヤーを隠す(リザルトではResultPlayerLineupが順位順に並べ直す)")]
+    [SerializeField] private bool hidePlayersOnResult = true;
+
 
     /// <summary>背景が出来上がった(カメラが着いて。ぼかしがかかりきった)。共通UIの登場のきっかけにつかえる</summary>
     public static event Action OnReady;
@@ -109,6 +112,13 @@ public class MinigameResultBackground : MonoBehaviour
         foreach (GameObject target in hideOnResult)
         {
             if (target != null) target.SetActive(false);
+        }
+        if(hidePlayersOnResult)
+        {
+            foreach(PlayerCharacterVisual player in FindObjectsByType<PlayerCharacterVisual>(FindObjectsSortMode.None))
+            {
+                player.SetHiddenTemporarily(true);
+            }
         }
 
         // ぼかしにはホストプロセスが必要なので、リザルトの間だけオンにする

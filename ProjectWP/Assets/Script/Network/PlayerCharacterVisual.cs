@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
 
@@ -54,6 +54,18 @@ public class PlayerCharacterVisual : NetworkBehaviour
     private Renderer[] renderers;
     private MaterialPropertyBlock materialPropertyBlock;
 
+    // リザルトなどで、一時的に見た目を隠しているから
+    private bool hiddenTemporarily;
+
+
+    /// <summary>見た目だけを一時的に隠す/戻す(例：リザルトでステージ上のキャラクターを隠す)シーンが変わると自動で元に戻る</summary>
+    public void SetHiddenTemporarily(bool hidden)
+    {
+        hiddenTemporarily = hidden;
+        UpdateVisibility(SceneManager.GetActiveScene().name);
+    }
+
+
     private void Awake()
     {
         // 子階層(モデル側)についているAnimator/Rendererをまとめて取得しておく
@@ -75,6 +87,8 @@ public class PlayerCharacterVisual : NetworkBehaviour
 
     private void OnActiveSceneChanged(Scene previousScene, Scene newScene)
     {
+        // シーンが変わったら一時的に隠していたのは元に戻す(リザルトで隠したまま次のミニゲームに行かないように)
+        hiddenTemporarily = false;
         UpdateVisibility(newScene.name);
     }
 
@@ -85,7 +99,7 @@ public class PlayerCharacterVisual : NetworkBehaviour
     /// </summary>
     private void UpdateVisibility(string sceneName)
     {
-        bool visible = sceneName != HiddenInSceneName;
+        bool visible = sceneName != HiddenInSceneName && !hiddenTemporarily;
         if (renderers == null) return;
 
         foreach (Renderer r in renderers)

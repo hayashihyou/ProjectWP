@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using Unity.Collections;
 using Unity.Netcode;
@@ -16,6 +16,10 @@ public abstract class MinigameBase : NetworkBehaviour
     [Header("流れ")]
     [Tooltip("カウントダウンの秒数。3なら「3,2,1,スタート！」。0の場合、スタートの合図のみ")]
     [SerializeField] private int countdownSeconds = 3;
+
+    [Tooltip("「スタート！」の合図(カウントダウン 0)を出してから、プレイ(計測)を始めるまでの秒数。" +
+             "スタートのテクスチャが消えてから始めたいときは、演出の長さ + 余韻にする。0 = すぐ始める")]
+    [SerializeField, Min(0f)] private float startSignalLeadSeconds = 0f;
 
     [Header("演出(待つ秒数。0 = 待たない)")]
     [Tooltip("イントロ演出の秒数(最初の1回だけ)。秒数で決まらない演出は OnServerIntroAsync を override する")]
@@ -585,6 +589,11 @@ public abstract class MinigameBase : NetworkBehaviour
 
         // スタートの合図
         CountdownRpc(0);
+        // 「スタート！」の演出を見せてからプレイ(計測)を始める
+        if (startSignalLeadSeconds > 0f)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(startSignalLeadSeconds), cancellationToken: ct);
+        }
         // ラウンド制限時間を計算
         if(roundTimeLimit > 0)
         {
