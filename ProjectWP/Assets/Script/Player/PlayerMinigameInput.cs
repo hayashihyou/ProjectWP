@@ -43,6 +43,17 @@ public class PlayerMinigameInput : MonoBehaviour
         //自身のキャラクター以外(PlayerOwnerControl が PlayerInput を無効にしている)
         if(!playerInput.enabled) return;
 
+        // 準備確認の間は、決定ボタンで「準備OK」を送る(どのミニゲームでも同じ。ミニゲームの種類が None でも動く)
+        if (MinigameInfo.IsReadyCheck)
+        {
+            // ReadyUI が出る前(全員の画面にそろって出るまでの一瞬)は受け付けない
+            if (MinigameInfo.CanSendReady && !MinigameInfo.IsLocalPlayerReady && WasPressedThisFrame(ConfirmActionName))
+            {
+                MinigameInfo.SendReady();
+            }
+            return;
+        }
+
         if (type == MinigameType.None) return;
 
         if (!MinigameInfo.CanControl) return;

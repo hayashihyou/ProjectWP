@@ -150,6 +150,59 @@ public static class MinigameInfo
     }
 
 
+    // ==================== 準備確認(全員が「準備OK」を押すまで待つ) ====================
+
+    /// <summary>今「準備OK」を受け付けているか(Phase が ReadyCheck)</summary>
+    public static bool IsReadyCheck => Phase == MinigamePhase.ReadyCheck;
+
+    /// <summary>今のサーバー時刻(秒)。全員の端末でそろっている。ミニゲームが動いていなければ 0</summary>
+    public static double ServerTime =>
+        NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening ? NetworkManager.Singleton.ServerTime.Time : 0;
+
+    /// <summary>ReadyUI を出す時刻(サーバー時刻)。全員がこの時刻に出すので、表示がそろう。まだ決まっていなければ -1</summary>
+    public static double ReadyUiShowServerTime { get; private set; } = -1;
+
+    /// <summary>ReadyUI を消し始める時刻(サーバー時刻)。全員そろったときに決まる。まだなら -1</summary>
+    public static double ReadyUiHideServerTime { get; private set; } = -1;
+
+    /// <summary>
+    /// 今「準備OK」を押してよいか(準備確認中で、ReadyUI が出る時刻を過ぎている)。
+    /// ReadyUI が出る前に押されないように、入力のスクリプトはこれを見る
+    /// </summary>
+    public static bool CanSendReady => IsReadyCheck && (ReadyUiShowServerTime < 0 || ServerTime >= ReadyUiShowServerTime);
+
+    /// <summary>その枠(0 = 1P)の人が「準備OK」を押したか</summary>
+    public static bool IsPlayerReady(int slot)
+    {
+        MinigamePlayerState player;
+        return TryGetPlayerBySlot(slot, out player) && player.IsReady;
+    }
+
+    /// <summary>自分(この端末)が「準備OK」を押したか</summary>
+    public static bool IsLocalPlayerReady
+    {
+        get
+        {
+            MinigamePlayerState player;
+            return TryGetLocalPlayer(out player) && player.IsReady;
+        }
+    }
+
+    /// <summary>
+    /// 自分(この端末)の「準備OK」をサーバーに送る。例: 決定ボタンが押されたら MinigameInfo.SendReady()。
+    /// Phase が ReadyCheck のときだけ有効(それ以外はサーバーで無視される)。2回送っても1回分
+    /// </summary>
+    public static void SendReady()
+    {
+        if (!IsActive)
+        {
+            UnityEngine.Debug.LogWarning("[MinigameInfo] ミニゲームが動いていないので、準備OKを送れません");
+            return;
+        }
+        current.SendReady();
+    }
+
+
     // ==================== 結果の後の行き先(ホストが選ぶ) ====================
 
     /// <summary>この端末がホストか(結果の後の行き先を選べるのはホストだけ)</summary>
@@ -222,6 +275,12 @@ public static class MinigameInfo
     /// <summary>ホストが結果の後の行き先を選んだ(選ばれた行き先)。例: 参加者の画面に「もう一度遊びます」と出す</summary>
     public static event Action<MinigameNextAction> OnNextChosen;
 
+    /// <summary>誰かが「準備OK」を押した(枠番号)。例: その人のパネルを「OK!」にする</summary>
+    public static event Action<int> OnPlayerReady;
+
+    /// <summary>全員の「準備OK」がそろった。例: ReadyUI を消す</summary>
+    public static event Action OnAllPlayersReady;
+
 
     // ==================== ここから下は MinigameBase だけが使う ====================
 
@@ -247,6 +306,10 @@ public static class MinigameInfo
         OnGameFinished = null;
         OnCustomEvent = null;
         OnNextChosen = null;
+        OnPlayerReady = null;
+        OnAllPlayersReady = null;
+        ReadyUiShowServerTime = -1;
+        ReadyUiHideServerTime = -1;
     }
 
     internal static void RaisePhaseChanged(MinigamePhase phase, int round) => OnPhaseChanged?.Invoke(phase, round);
@@ -263,6 +326,17 @@ public static class MinigameInfo
     internal static void RaisePlayerLeft(int slot) => OnPlayerLeft?.Invoke(slot);
     internal static void RaiseCustomEvent(string eventName, MinigameValue value, int slot) => OnCustomEvent?.Invoke(eventName, value, slot);
     internal static void RaiseNextChosen(MinigameNextAction action) => OnNextChosen?.Invoke(action);
+    internal static void RaisePlayerReady(int slot) => OnPlayerReady?.Invoke(slot);
+    internal static void SetReadyUiShowTime(double showServerTime)
+    {
+        ReadyUiShowServerTime = showServerTime;
+        ReadyUiHideServerTime = -1;
+    }
+    internal static void RaiseAllPlayersReady(double hideServerTime)
+    {
+        ReadyUiHideServerTime = hideServerTime;
+        OnAllPlayersReady?.Invoke();
+    }
 
     internal static void SetResultAndRaise(MinigameRankEntry[] result)
     {
