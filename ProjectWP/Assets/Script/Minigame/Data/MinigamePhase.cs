@@ -17,5 +17,7 @@ public enum MinigamePhase : byte
     RoundReset,           // 次のラウンドの準備中
     // -------- ラウンド制の場合、ここまでループ --------------
     GameEnd,              // ゲーム終了演出
-    Result                // 結果表示中
+    Result,               // 結果表示中
+    ReadyCheck            // 全員の「準備OK」待ち(MinigameBase の Require Player Ready がオンのとき、ゲーム中に1回だけ)。
+                          // 後から足したので最後に置いている(途中に入れると、インスペクターに保存済みの値がずれるため)
 }

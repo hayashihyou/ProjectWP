@@ -36,6 +36,9 @@ public class ResultPlayerLineup : MonoBehaviour
     [Tooltip("オン = 表示するときにカメラの位置・向きに合わせる。オフ = 置いた場所のまま")]
     [SerializeField] private bool alignToCamera = true;
 
+    [Tooltip("オン = キャラクターをまっすぐ立たせて、カメラの位置のほうを向かせる(カメラ目線)。オフ = 台の向きのまま")]
+    [SerializeField] private bool faceCamera = true;
+
 
     private readonly List<ResultRankSpot> spots = new List<ResultRankSpot>();
     private MaterialPropertyBlock propertyBlock;
@@ -75,12 +78,30 @@ public class ResultPlayerLineup : MonoBehaviour
             if (!MinigameRanking.TryGetByOrder(spot.Order, out MinigameRankEntry entry)) continue;
 
             GameObject model = CreateDisplayModel(displayModelPrefab, spot.transform);
+            SetLayerRecursively(model, LayerMask.NameToLayer(MinigameResultBackground.CharacterLayerName)); // 背景を暗くしても明るく描かれるように
             ApplyColor(model, GetSlotColor(entry.SlotIndex, slots));
             PlayAnimation(model, spot.AnimationState);
 
             spot.Show(entry, model, cam);
+            if (faceCamera && cam != null) FaceCamera(model.transform, cam.transform.position);
             Debug.Log($"[ResultLineup] {spot.Order}番目の台: {entry.SlotIndex + 1}P ({entry.Rank}位)");
         }
+    }
+
+    // モデルとその子をすべてそのレイヤーにする(レイヤーが無ければ何もしない)
+    private static void SetLayerRecursively(GameObject root, int layer)
+    {
+        if (layer < 0) return;
+        foreach (Transform t in root.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = layer;
+    }
+
+    // キャラクターをまっすぐ立たせたまま、カメラの位置のほうへ向ける(上下には傾けない)
+    private static void FaceCamera(Transform model, Vector3 cameraPosition)
+    {
+        Vector3 toCamera = cameraPosition - model.position;
+        toCamera.y = 0f;
+        if (toCamera.sqrMagnitude < 0.0001f) return;
+        model.rotation = Quaternion.LookRotation(toCamera, Vector3.up);
     }
 
     /// <summary>並べたモデルと「〇位」の文字を隠す</summary>

@@ -43,3 +43,12 @@ public enum MinigameNextAction : byte
     ToStageSelect,  // ステージ選択へ
     ToTitle         // タイトルへ(部屋を解散)
 }
+
+/// <summary>
+/// 準備確認(全員が「準備OK」を押すまで待つ)をいつ行うか
+/// </summary>
+public enum MinigameReadyTiming : byte
+{
+    BeforeFirstCountdown,   // イントロと1ラウンド目の開始演出の後、最初のカウントダウンの直前(ルールや目標を見てから押せる)
+    BeforeIntro             // シーンが明るくなってすぐ(イントロの前)
+}

@@ -14,6 +14,7 @@ public struct MinigamePlayerState : INetworkSerializable, IEquatable<MinigamePla
     public bool IsEliminated;  // 脱落したか
     public bool IsConnected;   // 接続中か
     public bool IsCpu;         // CPUか(将来的に、抜け番に加える可能性があるため)
+    public bool IsReady;       // 準備確認(ReadyCheck)で「準備OK」を押したか
 
     /// <summary>
     /// バイトへの変換とバイトからの復元
@@ -36,6 +37,7 @@ public struct MinigamePlayerState : INetworkSerializable, IEquatable<MinigamePla
         serializer.SerializeValue(ref IsEliminated);
         serializer.SerializeValue(ref IsConnected);
         serializer.SerializeValue(ref IsCpu);
+        serializer.SerializeValue(ref IsReady);
     }
 
 
@@ -54,6 +56,7 @@ public struct MinigamePlayerState : INetworkSerializable, IEquatable<MinigamePla
             && IsFinished == other.IsFinished
             && IsEliminated == other.IsEliminated
             && IsConnected == other.IsConnected
-            && IsCpu == other.IsCpu;
+            && IsCpu == other.IsCpu
+            && IsReady == other.IsReady;
     }
 };

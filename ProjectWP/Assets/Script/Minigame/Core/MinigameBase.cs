@@ -21,6 +21,23 @@ public abstract class MinigameBase : NetworkBehaviour
              "スタートのテクスチャが消えてから始めたいときは、演出の長さ + 余韻にする。0 = すぐ始める")]
     [SerializeField, Min(0f)] private float startSignalLeadSeconds = 0f;
 
+    [Header("準備確認")]
+    [Tooltip("オン = 全員が決定ボタンで「準備OK」を押すまで、ゲームを始めない。表示はシーンに置いた ReadyUI プレハブ(MinigameReadyUI)が担当する")]
+    [SerializeField] private bool requirePlayerReady = true;
+
+    [Tooltip("準備確認をいつ行うか。BeforeFirstCountdown = 最初のカウントダウンの直前(イントロの後) / BeforeIntro = シーンが明るくなってすぐ")]
+    [ShowIf(nameof(requirePlayerReady))]
+    [SerializeField] private MinigameReadyTiming readyTiming = MinigameReadyTiming.BeforeFirstCountdown;
+
+    [Tooltip("全員そろってから次へ進むまでの秒数。ReadyUI が消える演出(ScreenFader の Delay + Duration)より長くする")]
+    [ShowIf(nameof(requirePlayerReady))]
+    [SerializeField, Min(0f)] private float afterAllReadySeconds = 1.5f;
+
+    [Tooltip("ReadyUI を出す・消すタイミングを全員でそろえるための待ち時間(秒)。サーバーが「今から この秒数後」を全員に配り、" +
+             "各端末はサーバー時刻がその時刻になったら表示する。通信の遅れより長くする(短いと遅れた人だけずれる)")]
+    [ShowIf(nameof(requirePlayerReady))]
+    [SerializeField, Min(0f)] private float readyUiSyncDelaySeconds = 0.3f;
+
     [Header("演出(待つ秒数。0 = 待たない)")]
     [Tooltip("イントロ演出の秒数(最初の1回だけ)。秒数で決まらない演出は OnServerIntroAsync を override する")]
     [SerializeField] private float introSeconds = 0f;
@@ -180,6 +197,114 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
 
+    // ---------- 準備確認(全員が決定ボタンで「準備OK」を押すまで待つ) ----------
+    // 上の NotifyReadyRpc は「シーンの読み込みが終わった(自動で送られる)」、
+    // こちらは「プレイヤーが決定ボタンを押した(手動)」。別のものなので注意
+
+    // 準備確認をして、全員そろうまで待つ(サーバーで呼ばれる)。設定がオフなら何もしない
+    private async UniTask ServerRunReadyCheckAsync(CancellationToken ct)
+    {
+        if (!requirePlayerReady) { return; }
+
+        if (FindFirstObjectByType<MinigameReadyUI>(FindObjectsInactive.Include) == null)
+        {
+            Debug.LogWarning("[MinigameBase] 準備確認をしますが、シーンに ReadyUI(MinigameReadyUI)がありません。" +
+                             "Prefabs/UI/MinigameReadyUI を置くか、Require Player Ready をオフにしてください");
+        }
+
+        // 全員を「まだ」にする。CPU は最初から準備OK
+        for (int i = 0; i < players.Count; i++)
+        {
+            MinigamePlayerState state = players[i];
+            state.IsReady = state.IsCpu;
+            players[i] = state;
+        }
+
+        // 全員が同じ瞬間に ReadyUI を出せるように、出す時刻(サーバー時刻)を先に配っておく
+        // (同じオブジェクトの RPC は送った順に届くので、フェーズの合図より先に届く)
+        ReadyUiScheduleRpc(NetworkManager.ServerTime.Time + readyUiSyncDelaySeconds);
+        ServerSetPhase(MinigamePhase.ReadyCheck);
+        await UniTask.WaitUntil(ServerAreAllPlayersReady, cancellationToken: ct);
+
+        Debug.Log("[MinigameBase] 全員が準備OKになりました");
+
+        // 消し始める時刻も全員でそろえる
+        double hideAt = NetworkManager.ServerTime.Time + readyUiSyncDelaySeconds;
+        AllPlayersReadyRpc(hideAt);
+        await UniTask.WaitUntil(() => NetworkManager.ServerTime.Time >= hideAt, cancellationToken: ct);
+
+        // ReadyUI が消える演出を待ってから次へ進む
+        await ServerWaitSecondsAsync(afterAllReadySeconds, ct);
+    }
+
+    // 待つべき全員が「準備OK」を押したか(サーバーで呼ばれる)。CPU と、途中で抜けた人は待たない
+    private bool ServerAreAllPlayersReady()
+    {
+        for (int i = 0; i < players.Count; i++)
+        {
+            MinigamePlayerState player = players[i];
+            if (player.IsCpu || !player.IsConnected) { continue; }
+            if (!ServerIsClientConnected(player.ClientId)) { continue; } // 抜けた人を待ち続けないように
+            if (!player.IsReady) { return false; }
+        }
+        return true;
+    }
+
+    // その端末が今もつながっているか(サーバーで呼ばれる)
+    private bool ServerIsClientConnected(ulong clientId)
+    {
+        foreach (ulong id in NetworkManager.ConnectedClientsIds)
+        {
+            if (id == clientId) { return true; }
+        }
+        return false;
+    }
+
+    // 「準備OK」を受け取る(サーバーで実行)。誰が押したかは送信元のIDで決める(なりすましができない)
+    [Rpc(SendTo.Server)]
+    private void PlayerReadyRpc(RpcParams rpcParams = default)
+    {
+        if (Phase != MinigamePhase.ReadyCheck) { return; } // 準備確認の間だけ受け付ける
+
+        ulong senderId = rpcParams.Receive.SenderClientId;
+        for (int i = 0; i < players.Count; i++)
+        {
+            MinigamePlayerState state = players[i];
+            if (state.ClientId != senderId || state.IsCpu || state.IsReady) { continue; } // 2回押しても1回分
+
+            state.IsReady = true;
+            players[i] = state;
+            PlayerReadyChangedRpc(state.SlotIndex);
+        }
+    }
+
+    // 誰かが準備OKになったことを全員に知らせる(全員の端末で実行)
+    [Rpc(SendTo.Everyone)]
+    private void PlayerReadyChangedRpc(int slot)
+    {
+        Debug.Log($"[MinigameBase] {slot + 1}P 準備OK");
+        MinigameInfo.RaisePlayerReady(slot);
+    }
+
+    // ReadyUI を出す時刻(サーバー時刻)を全員に知らせる(全員の端末で実行)
+    [Rpc(SendTo.Everyone)]
+    private void ReadyUiScheduleRpc(double showServerTime) => MinigameInfo.SetReadyUiShowTime(showServerTime);
+
+    // 全員そろったことと、ReadyUI を消し始める時刻(サーバー時刻)を全員に知らせる(全員の端末で実行)
+    [Rpc(SendTo.Everyone)]
+    private void AllPlayersReadyRpc(double hideServerTime) => MinigameInfo.RaiseAllPlayersReady(hideServerTime);
+
+    /// <summary>
+    /// 自分(この端末)の「準備OK」をサーバーに送る(どの端末からでも呼べる)。Phase が ReadyCheck のときだけ有効。
+    /// UI や入力のスクリプトからは MinigameInfo.SendReady で呼べる
+    /// </summary>
+    public void SendReady()
+    {
+        if (!IsSpawned) { return; }
+        PlayerReadyRpc();
+    }
+
+
     // ゲーム全体の進行役(サーバーで呼ばれる)。流れを上から順に、ラウンドの回数だけ繰り返す
     // 各フェーズの演出は OnServer〇〇Async で待つ(何も書かなければ、インスペクターの秒数だけ待つ)
     private async UniTaskVoid ServerRunGameAsync()
@@ -196,6 +321,12 @@ public abstract class MinigameBase : NetworkBehaviour
         // シーン遷移のフェードインが終わってから始める(画面が暗いうちにイントロやカウントダウンが進まないように)
         await ServerWaitForSceneTransitionAsync(ct);
 
+        // 準備確認(イントロの前に行う設定のとき)
+        if (readyTiming == MinigameReadyTiming.BeforeIntro)
+        {
+            await ServerRunReadyCheckAsync(ct);
+        }
+
         // イントロ演出(最初の1回だけ)
         ServerSetPhase(MinigamePhase.Intro);
         await OnServerIntroAsync(ct);
@@ -208,6 +339,12 @@ public abstract class MinigameBase : NetworkBehaviour
             // ラウンド開始演出(例: 目標を見せる)
             ServerSetPhase(MinigamePhase.RoundIntro);
             await OnServerRoundIntroAsync(round, ct);
+
+            // 準備確認(最初のカウントダウンの直前に行う設定のとき。1ラウンド目だけ)
+            if (round == 1 && readyTiming == MinigameReadyTiming.BeforeFirstCountdown)
+            {
+                await ServerRunReadyCheckAsync(ct);
+            }
 
             serverRoundTimedUp = false;
             await ServerRunCountdownAsync(ct);
