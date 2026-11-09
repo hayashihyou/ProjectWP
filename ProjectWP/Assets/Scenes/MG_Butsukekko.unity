@@ -388,7 +388,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3947503187358000301, guid: c068a7f978792294a97f6a9473f6815b, type: 3}
       propertyPath: m_Name
-      value: PieThrowRoom
+      value: ButsukekkoRoom
       objectReference: {fileID: 0}
     - target: {fileID: 4940645327922596792, guid: c068a7f978792294a97f6a9473f6815b, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -719,7 +719,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7740060717462470826, guid: 70304506f2788f14d81f8a4c091e87f0, type: 3}
       propertyPath: m_Name
-      value: PieBall
+      value: ButsukekkoBall
       objectReference: {fileID: 0}
     - target: {fileID: 7740060717462470826, guid: 70304506f2788f14d81f8a4c091e87f0, type: 3}
       propertyPath: m_IsActive

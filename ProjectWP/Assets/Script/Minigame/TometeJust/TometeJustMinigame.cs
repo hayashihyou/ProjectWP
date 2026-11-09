@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 
 /// <summary>
-/// 連続ストップウォッチ : 目標の秒数ピッタリでストップする。3ラウンドの誤差の合計が小さいほど勝ち
+/// 止めてジャスト！ : 目標の秒数ピッタリでストップする。3ラウンドの誤差の合計が小さいほど勝ち
 /// </summary>
-public class StopwatchMinigame : MinigameBase
+public class TometeJustMinigame : MinigameBase
 {
     [Header("ストップウォッチ")]
     [Tooltip("目標の秒数の最小値。毎ラウンド、最小～最大の間から刻みごとにランダムに決める。最小と最大を同じにすると固定になる")]
@@ -25,7 +25,7 @@ public class StopwatchMinigame : MinigameBase
     [SerializeField] private float startDelaySeconds = 2.0f;
 
     // UI・入力の担当と名前をそろえる(1文字でも違うと届かない)
-    // public にしてあるので、他のスクリプトからは StopwatchMinigame.StopEventName のように使うと打ち間違いがない
+    // public にしてあるので、他のスクリプトからは TometeJustMinigame.StopEventName のように使うと打ち間違いがない
     public const string TargetInfoName = "目標時間";   // 情報 : 今のラウンドの目標の秒数
     public const string StopActionName = "Stop";       // 行動 : ストップボタンが押された
     public const string StopEventName = "ストップ";    // 出来事 : 誰かが止めた(値 = 止めた秒数)
@@ -35,7 +35,7 @@ public class StopwatchMinigame : MinigameBase
     // 今のラウンドの目標の秒数(サーバーだけが使う)
     private float targetSeconds;
 
-    public override MinigameType Type => MinigameType.Stopwatch;
+    public override MinigameType Type => MinigameType.TometeJust;
 
 
     // イントロ演出(最初の1回だけ)

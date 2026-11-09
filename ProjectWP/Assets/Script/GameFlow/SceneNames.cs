@@ -22,10 +22,10 @@ public static class SceneNames
     public const string StageSelect = "03_StageSelect";
 
     /// <summary>連続ストップウォッチ</summary>
-    public const string Stopwatch = "MG_Stopwatch";
+    public const string TometeJust = "MG_TometeJust";
 
     /// <summary>パイ投げ</summary>
-    public const string PieThrow = "MG_PieThrow";
+    public const string Butsukekko = "MG_Butsukekko";
 
     /// <summary>カメラの中心に映れ</summary>
     public const string CameraCenter = "MG_CameraCenter";
@@ -35,7 +35,7 @@ public static class SceneNames
 
 
     ///<summary>ミニゲームの一覧(一覧画面の並び順や「もう一度」の判定に使う)</summary>
-    public static readonly string[] MiniGames = { PieThrow, Stopwatch, CameraCenter };
+    public static readonly string[] MiniGames = { Butsukekko, TometeJust, CameraCenter };
 
     // ---------- 動作確認用 ----------
 
