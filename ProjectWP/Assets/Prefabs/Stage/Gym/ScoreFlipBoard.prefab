@@ -415,7 +415,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f98781b1ffab134ca8f044fabafc436, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PieThrowScoreBoard
+  m_EditorClassIdentifier: Assembly-CSharp::ButsukekkoScoreBoard
   slotIndex: 0
   tensDigit: {fileID: 4683082706565577084}
   onesDigit: {fileID: 1442061863791902510}
