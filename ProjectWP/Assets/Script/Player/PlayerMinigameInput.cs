@@ -13,7 +13,7 @@ public class PlayerMinigameInput : MonoBehaviour
     // 入力アクション名(PlayerControls.inputActions の Player マップに同じ名前で追加する)
     private const string ConfirmActionName = "Confirm";
 
-    // ミニゲーム側(StopwatchMinigame.cs)の StopActionName と同じにする(1文字でも違うと届かない)
+    // ミニゲーム側(TometeJustMinigame.cs)の StopActionName と同じにする(1文字でも違うと届かない)
     private const string StopwatchAction = "Stop";
 
     private PlayerInput playerInput; // 入力管理
@@ -65,7 +65,7 @@ public class PlayerMinigameInput : MonoBehaviour
     {
         switch(type)
         {
-            case MinigameType.Stopwatch:
+            case MinigameType.TometeJust:
                if(WasPressedThisFrame(ConfirmActionName))
                 {
                     MinigameInfo.SendAction(StopwatchAction);
@@ -79,7 +79,7 @@ public class PlayerMinigameInput : MonoBehaviour
     {
         switch(type)
         {
-            case MinigameType.Stopwatch:
+            case MinigameType.TometeJust:
                 // 移動禁止。決定ボタンのみ操作可能にする
                 playerMovement.SetMovementLocked(true);
                 break;

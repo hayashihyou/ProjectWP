@@ -10,7 +10,7 @@ using UnityEngine;
 ///
 /// インスペクターの「最初の点数」を変えると、再生しなくても見た目に反映される(確認用)。
 /// </summary>
-public class PieThrowScoreBoard : MonoBehaviour
+public class ButsukekkoScoreBoard : MonoBehaviour
 {
     private const int MinDisplayScore = -9;
     private const int MaxDisplayScore = 99;

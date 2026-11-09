@@ -101,8 +101,8 @@ public class StopwatchSounds : MonoBehaviour
 
     private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
     {
-        if (eventName == StopwatchMinigame.TargetEventName) { Play(targetShowId); }
-        else if (eventName == StopwatchMinigame.StopEventName) { Play(stopId); }
+        if (eventName == TometeJustMinigame.TargetEventName) { Play(targetShowId); }
+        else if (eventName == TometeJustMinigame.StopEventName) { Play(stopId); }
     }
 
     // カバーを外す revealBeforeLead 秒前から「公開前」→ 外す瞬間に止めて「公開」
