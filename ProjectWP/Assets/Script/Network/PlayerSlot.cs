@@ -43,6 +43,13 @@ public class PlayerSlot : NetworkBehaviour
 
     public Color SlotColor => SlotIndex >= 0 && SlotIndex < slotColors.Length ? slotColors[SlotIndex] : Color.white;
 
+    /// <summary>
+    /// 誰かが待機画面に参加した(枠が決まった)瞬間に、全員の画面でそれぞれ呼ばれる。
+    /// 参加エフェクトなどの演出側はこれを聞くだけでよく、このクラスに演出の参照を持たせなくて済む。
+    /// (参加音と同じタイミング。後から参加した人の画面では、既にいる人の分は呼ばれない)
+    /// </summary>
+    public static event System.Action<PlayerSlot> Joined;
+
     private PlayerCharacterVisual visual;
     private NetworkTransform networkTransform;
 
@@ -196,6 +203,9 @@ public class PlayerSlot : NetworkBehaviour
         if (previousValue < 0 && newValue >= 0)
         {
             SoundManager.Instance.PlaySe(JoinSoundId);
+
+            // 参加エフェクトなど、参加の瞬間に動く演出へ知らせる
+            Joined?.Invoke(this);
         }
     }
 
