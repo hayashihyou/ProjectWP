@@ -118,7 +118,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: efd331d4b11709f40b82377af7a18459, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8093472962506635530}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: efd331d4b11709f40b82377af7a18459, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3946986788720639082}
   m_SourcePrefab: {fileID: 100100000, guid: efd331d4b11709f40b82377af7a18459, type: 3}
+--- !u!4 &3793411359352477816 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1824824446595371411, guid: efd331d4b11709f40b82377af7a18459, type: 3}
+  m_PrefabInstance: {fileID: 5910988108691224085}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6830101962358524740 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: efd331d4b11709f40b82377af7a18459, type: 3}
@@ -196,18 +204,18 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkTransformExpanded: 0
   AutoOwnerAuthorityTickOffset: 1
-  PositionInterpolationType: 0
-  RotationInterpolationType: 0
+  PositionInterpolationType: 1
+  RotationInterpolationType: 1
   ScaleInterpolationType: 0
-  PositionLerpSmoothing: 1
+  PositionLerpSmoothing: 0
   PositionMaxInterpolationTime: 0.1
   RotationLerpSmoothing: 1
-  RotationMaxInterpolationTime: 0.1
+  RotationMaxInterpolationTime: 0.05
   ScaleLerpSmoothing: 1
-  ScaleMaxInterpolationTime: 0.1
+  ScaleMaxInterpolationTime: 0.05
   AuthorityMode: 1
   TickSyncChildren: 0
-  UseUnreliableDeltas: 0
+  UseUnreliableDeltas: 1
   SyncPositionX: 1
   SyncPositionY: 1
   SyncPositionZ: 1
@@ -326,7 +334,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 68d50888a6fa6c14a81e077a33f645f0, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -347,3 +355,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bade850b7c7815d48a0c420b43e4b6ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMinigameInput
+--- !u!114 &-3946986788720639082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6830101962358524740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 055e877f2a8384a4495196674e1380d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBallAnimation
+  animator: {fileID: 0}
+  rigidHand: {fileID: 3793411359352477816}

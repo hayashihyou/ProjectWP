@@ -1,60 +1,94 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// プレイヤーのボール関係のアニメーション。プレイヤーの一番上(Animator と同じオブジェクト)に付ける。
+/// ・持っているか(IsHolding)は、ボールの状態から毎フレーム決める(全員の画面で同じになる)
+/// ・投げる(Throw)は、サーバーからの「投げる」の出来事で再生する
+/// ・ボールを付ける手の位置を、ボールに教える
+/// </summary>
 public class PlayerBallAnimation : MonoBehaviour
 {
-    [SerializeField] Animator animator;
-    [SerializeField] Transform rigidHand;
-    GameObject heldBall;
-    Vector3 lastPos;
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
+    private static readonly int ThrowHash = Animator.StringToHash("Throw");
+    private static readonly int IsHoldingHash = Animator.StringToHash("IsHolding");
 
-    void Start()
+    [SerializeField] private Animator animator;
+
+    [Tooltip("ボールを持たせる手(右手のボーン)")]
+    [SerializeField] private Transform rigidHand;
+
+    private PlayerSlot playerSlot;
+    private Vector3 lastPos;
+
+    // ミニゲームが終わるとイベントの登録が消えるので、ミニゲームが始まるたびに登録し直す
+    private bool isSubscribed;
+
+    /// <summary>ボールを持たせる位置</summary>
+    public Transform Hand => rigidHand != null ? rigidHand : transform;
+
+    private void Awake()
     {
-        if (animator == null) animator = GetComponent<Animator>();
-        lastPos = transform.position;
+        if (animator == null) animator = GetComponentInChildren<Animator>();
+        playerSlot = GetComponentInParent<PlayerSlot>();
     }
 
+    private void OnEnable()
+    {
+        lastPos = transform.position;
+        isSubscribed = false;
+    }
+
+    private void OnDisable()
+    {
+        MinigameInfo.OnCustomEvent -= HandleCustomEvent;
+        isSubscribed = false;
+    }
 
     private void Update()
     {
-        // 移動速度をAnimatorに渡す(地面方向の移動のみ)
+        UpdateSubscription();
+
+        if (animator == null) return;
+
+        // 移動速度を Animator に渡す(地面方向の移動のみ。ほかの人のキャラクターでも動く)
         Vector3 delta = transform.position - lastPos;
-        delta.y = 0;
-        animator.SetFloat("Speed", delta.magnitude / Time.deltaTime);
+        delta.y = 0f;
         lastPos = transform.position;
-
-
-        // 例：左クリックで投げる
-        if (heldBall != null && Input.GetMouseButtonDown(0))
+        if (Time.deltaTime > 0f)
         {
-            animator.SetTrigger("Throw");
+            animator.SetFloat(SpeedHash, delta.magnitude / Time.deltaTime);
+        }
+
+        // ボールを持っているか
+        int slot = playerSlot != null ? playerSlot.SlotIndex : -1;
+        animator.SetBool(IsHoldingHash, slot >= 0 && ButsukekkoBall.IsHeldBy(slot));
+    }
+
+    private void UpdateSubscription()
+    {
+        if (MinigameInfo.IsActive)
+        {
+            if (!isSubscribed)
+            {
+                MinigameInfo.OnCustomEvent -= HandleCustomEvent; // 二重登録しないように一度外す
+                MinigameInfo.OnCustomEvent += HandleCustomEvent;
+                isSubscribed = true;
+            }
+        }
+        else
+        {
+            // ミニゲームが終わった時点で登録は消えているので、次のミニゲームで登録し直す
+            isSubscribed = false;
         }
     }
 
-
-    // ボールを拾った時に呼ぶ
-    public void PickUp(GameObject ball)
+    // サーバーからの出来事。自分のキャラクターが投げ始めたら、投げるアニメーションを再生する
+    private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
     {
-        heldBall = ball;
-        var rb = ball.GetComponent<Rigidbody>();
-        if(rb) rb.isKinematic = true;
-        ball.transform.SetParent(rigidHand);
-        ball.transform.localPosition = Vector3.zero;
-        animator.SetBool("IsHolding", true);
-    }
+        if (eventName != ButsukekkoMinigame.HitEventName) return;
+        if (playerSlot == null || slot != playerSlot.SlotIndex) return;
+        if (animator == null) return;
 
-
-    // 実際にボールを手から離す(投げる瞬間に呼ぶ)
-    public void ReleseBall()
-    {
-        if (heldBall == null) return;
-        heldBall.transform.SetParent(null);
-        var rb = heldBall.GetComponent<Rigidbody>();
-        if(rb)
-        {
-            rb.isKinematic = false;
-            rb.AddForce(transform.forward * 10f + Vector3.up * 3f, ForceMode.Impulse); 
-        }
-        heldBall = null;
-        animator.SetBool("IsHolding", false);
+        animator.SetTrigger(ThrowHash);
     }
 }

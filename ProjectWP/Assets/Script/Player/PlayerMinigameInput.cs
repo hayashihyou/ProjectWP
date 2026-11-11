@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// ミニゲーム用プレイヤー入力
@@ -69,6 +70,13 @@ public class PlayerMinigameInput : MonoBehaviour
                if(WasPressedThisFrame(ConfirmActionName))
                 {
                     MinigameInfo.SendAction(StopwatchAction);
+                }
+                break;
+            case MinigameType.Butsukekko:
+                // 決定ボタンで投げる。持っているか・投げて良いかはサーバーが判定する
+                if(WasPressedThisFrame(ConfirmActionName))
+                {
+                    MinigameInfo.SendAction(ButsukekkoMinigame.ThrowActionName);
                 }
                 break;
         }
