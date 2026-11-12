@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 /// PlaySe / PlayBgm が返す「鳴らした音の引換券」。
 /// ループSEをあとで止めたいときなどに、変数に持っておいて使う。
 ///
@@ -32,10 +32,13 @@ public readonly struct SoundHandle
 
     private bool IsValid => _voice != null && _voice.InUse && _voice.Generation == _generation;
 
-    /// <summary>止める。fadeSeconds を指定するとその秒数かけて小さくしてから止める</summary>
-    public void Stop(float fadeSeconds = 0f)
+    /// <summary>
+    /// 止める。fadeSeconds を指定するとその秒数かけて小さくしてから止める。
+    /// 省略すると SoundLibrary のその音の「Fade Out Seconds」に従う(0 ならすぐ止まる)
+    /// </summary>
+    public void Stop(float? fadeSeconds = null)
     {
-        if (IsValid) _voice.Stop(fadeSeconds);
+        if (IsValid) _voice.Stop(fadeSeconds ?? _voice.DefaultFadeOutSeconds);
     }
 
     public void Pause()

@@ -13,203 +13,255 @@ MonoBehaviour:
   m_Name: SoundLibrary
   m_EditorClassIdentifier: 
   _entries:
-  - id: Test_SE
-    clip: {fileID: 8300000, guid: 26dee96e9c984bef9262f6c1e82eb4ff, type: 3}
-    category: 1
-    volume: 1
-    pitch: 1
-    loop: 0
-    loopFadeSeconds: 0
-    randomizePitch: 0
-    randomPitchRange: 0.05
-    minInterval: 0.05
-  - id: Test_BGM
-    clip: {fileID: 8300000, guid: 184f0dbd891743f4b388fe944562f022, type: 3}
-    category: 0
-    volume: 0.6
-    pitch: 1
-    loop: 1
-    loopFadeSeconds: 0
-    randomizePitch: 0
-    randomPitchRange: 0
-    minInterval: 0
   - id: Common_Decide
     clip: {fileID: 8300000, guid: b20bf825fb4d4f43b54fe8e2bddc1319, type: 3}
     category: 1
+    sceneLabel: "\u5171\u901A(\u30E1\u30CB\u30E5\u30FC)"
+    usageLabel: "\u6C7A\u5B9A"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0.03
     minInterval: 0.05
   - id: Common_Disabled
     clip: {fileID: 8300000, guid: 59cf661387e94ead976eb58ef4dafb39, type: 3}
     category: 1
+    sceneLabel: "\u5171\u901A(\u30E1\u30CB\u30E5\u30FC)"
+    usageLabel: "\u62BC\u305B\u306A\u3044"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Common_PlayerJoin
     clip: {fileID: 8300000, guid: 952da54dda0a41e6a92ecbc63ec73bb4, type: 3}
     category: 1
+    sceneLabel: "\u5F85\u6A5F\u6240"
+    usageLabel: "\u30D7\u30EC\u30A4\u30E4\u30FC\u53C2\u52A0"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Common_PlayerLeave
     clip: {fileID: 8300000, guid: e93f4165d63746ccb117f2cf0d66f16e, type: 3}
     category: 1
+    sceneLabel: "\u5F85\u6A5F\u6240"
+    usageLabel: "\u30D7\u30EC\u30A4\u30E4\u30FC\u9000\u51FA"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Common_Ready
     clip: {fileID: 8300000, guid: e7aa3f0f4c0a477482e3bf0b7ac36890, type: 3}
     category: 1
+    sceneLabel: "\u5F85\u6A5F\u6240"
+    usageLabel: "\u6E96\u5099\u5B8C\u4E86"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Common_Start
     clip: {fileID: 8300000, guid: 5cd8279fd1094244a78e193e13a32dc8, type: 3}
     category: 1
+    sceneLabel: "\u30A4\u30F3\u30B2\u30FC\u30E0(\u5171\u901A)"
+    usageLabel: "\u30B9\u30BF\u30FC\u30C8"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Common_Finish
     clip: {fileID: 8300000, guid: 2df9fe43f3cc41318d883c118baaea45, type: 3}
     category: 1
+    sceneLabel: "\u30A4\u30F3\u30B2\u30FC\u30E0(\u5171\u901A)"
+    usageLabel: "\u30D5\u30A3\u30CB\u30C3\u30B7\u30E5"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Common_TimeUp
     clip: {fileID: 8300000, guid: 5957229e557d46e9be1a0d34c83c27f0, type: 3}
     category: 1
+    sceneLabel: "\u30A4\u30F3\u30B2\u30FC\u30E0(\u5171\u901A)"
+    usageLabel: "\u6642\u9593\u5207\u308C"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Stopwatch_Stop
     clip: {fileID: 8300000, guid: 09237748cc004691bea1c37fd3008012, type: 3}
     category: 1
+    sceneLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+    usageLabel: "\u6642\u9593\u3092\u6B62\u3081\u308B"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0.03
     minInterval: 0.05
   - id: Stopwatch_Tick
     clip: {fileID: 8300000, guid: 2cd54cdada554ef094fe663d6a36f17d, type: 3}
     category: 1
+    sceneLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+    usageLabel: "\u6642\u9593\u304C\u9032\u3093\u3067\u3044\u308B(\u30EB\u30FC\u30D7)"
     volume: 1
     pitch: 1
     loop: 1
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Stopwatch_TargetShow
     clip: {fileID: 8300000, guid: 1aaf301a42b640108c6bed8999ec1f23, type: 3}
     category: 1
+    sceneLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+    usageLabel: "\u76EE\u6A19\u6642\u9593\u306E\u8868\u793A"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Stopwatch_Reveal
     clip: {fileID: 8300000, guid: cb5b39ddee9540adb6f3202eb2c76c6c, type: 3}
     category: 1
+    sceneLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+    usageLabel: "\u6B62\u3081\u305F\u6642\u9593\u306E\u516C\u958B"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: Stopwatch_RevealBefore
     clip: {fileID: 8300000, guid: 77b4e95d9eed476e9d8a79626d3033b7, type: 3}
     category: 1
+    sceneLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+    usageLabel: "\u516C\u958B\u524D"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
   - id: BGM_Title
     clip: {fileID: 8300000, guid: b42ab74ae394e6447a3e598cb369aa53, type: 3}
     category: 0
-    volume: 0.85
+    sceneLabel: "\u30BF\u30A4\u30C8\u30EB"
+    usageLabel: "\u30BF\u30A4\u30C8\u30EBBGM"
+    volume: 0.76
     pitch: 1
     loop: 1
     loopFadeSeconds: 3
+    fadeInSeconds: 0.5
+    fadeOutSeconds: 0.5
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0
   - id: BGM_Lobby
     clip: {fileID: 8300000, guid: 4500724d8505d604682f65b99cb0f7f5, type: 3}
     category: 0
+    sceneLabel: "\u5F85\u6A5F\u6240\u30FB\u30B9\u30C6\u30FC\u30B8\u9078\u629E"
+    usageLabel: "\u5F85\u6A5F\u6240BGM"
     volume: 1
     pitch: 1
     loop: 1
     loopFadeSeconds: 3
+    fadeInSeconds: 0.5
+    fadeOutSeconds: 0.5
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0
   - id: BGM_Stopwatch
     clip: {fileID: 8300000, guid: 80786fa410bc06d45aa7cb9c18f06c62, type: 3}
     category: 0
+    sceneLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+    usageLabel: "\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1BGM"
     volume: 0.5
     pitch: 1
     loop: 1
     loopFadeSeconds: 3
+    fadeInSeconds: 0.5
+    fadeOutSeconds: 0.5
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0
   - id: BGM_Result
     clip: {fileID: 8300000, guid: d05a445905087fa438136730813bd255, type: 3}
     category: 0
+    sceneLabel: "\u30EA\u30B6\u30EB\u30C8"
+    usageLabel: "\u30EA\u30B6\u30EB\u30C8BGM"
     volume: 0.65
     pitch: 1
     loop: 1
     loopFadeSeconds: 3
+    fadeInSeconds: 0.5
+    fadeOutSeconds: 0.5
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0
   - id: Amb_Cheer
     clip: {fileID: 8300000, guid: fb18f5f0d47e471e864e79499026abd0, type: 3}
     category: 1
+    sceneLabel: "\u30A4\u30F3\u30B2\u30FC\u30E0(\u5171\u901A)"
+    usageLabel: "\u30AB\u30E1\u30E9\u6F14\u51FA(\u6B53\u58F0)"
     volume: 1
     pitch: 1
     loop: 0
     loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05

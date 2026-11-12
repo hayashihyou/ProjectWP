@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -8,11 +8,13 @@ using UnityEngine;
 /// シーンをまたいでも残るので、画面が切り替わってもBGMが途切れない。
 ///
 /// 使い方(どのスクリプトからでも):
-///   SoundManager.Instance.PlaySe("Test_SE");                 // SEを1回鳴らす
-///   var h = SoundManager.Instance.PlaySe("Test_SE", loop: true); // ループで鳴らして…
+///   SoundManager.Instance.PlaySe("Common_Decide");           // SEを1回鳴らす
+///   var h = SoundManager.Instance.PlaySe("Stopwatch_Tick", loop: true); // ループで鳴らして…
 ///   h.Stop();                                                   // …あとで止める
-///   SoundManager.Instance.PlayBgm("Test_BGM");               // BGMを流す(前の曲からは自動でクロスフェード)
-///   SoundManager.Instance.StopBgm();                         // BGMをフェードアウトして止める
+///   SoundManager.Instance.PlayBgm("BGM_Title");              // BGMを流す(前の曲からは自動でクロスフェード)
+///   SoundManager.Instance.StopBgm();                         // BGMを止める
+///
+/// フェードの秒数を省略すると、SoundLibrary のその音の「Fade In Seconds / Fade Out Seconds」を使う。
 ///   SoundManager.Instance.SetVolume(VolumeType.Bgm, 0.5f);   // BGM音量を半分に(自動で保存される)
 ///
 /// 音は「各プレイヤーのPCでそれぞれ鳴る」だけで、ネットワーク同期はしない。
@@ -26,8 +28,6 @@ public class SoundManager : MonoBehaviour
     // SE用のチャンネル数。最初は Initial 個用意し、足りなくなったら Max 個まで増やす
     private const int InitialSeVoices = 8;
     private const int MaxSeVoices = 32;
-
-    private const float DefaultBgmFadeSeconds = 0.5f;
 
     private const string VolumeKeyPrefix = "Sound.Volume.";
 
@@ -77,6 +77,22 @@ public class SoundManager : MonoBehaviour
     /// <summary>今流れているBGMのID。流れていなければ null</summary>
     public string CurrentBgmId =>
         CurrentBgm.InUse && !CurrentBgm.IsStopping ? CurrentBgm.Entry.id : null;
+
+    /// <summary>
+    /// BGMが少しでも鳴っているか。CurrentBgmId と違い、フェードアウトして消えていく途中も「鳴っている」とみなす。
+    /// 「前の曲が完全に消えてから次の曲を流す」ときに使う。
+    /// </summary>
+    public bool IsBgmSounding
+    {
+        get
+        {
+            foreach (var voice in _bgmVoices)
+            {
+                if (voice.InUse) return true;
+            }
+            return false;
+        }
+    }
 
     /// <summary>今鳴っているSEの数(動作確認用)</summary>
     public int ActiveSeCount
@@ -147,8 +163,10 @@ public class SoundManager : MonoBehaviour
     /// <param name="volumeScale">この1回だけの音量倍率</param>
     /// <param name="loop">ループするか。省略するとSoundLibraryの設定に従う</param>
     /// <param name="pitch">再生速度。省略するとSoundLibraryの設定に従う</param>
+    /// <param name="fadeInSeconds">鳴らし始めのフェードイン秒数。省略するとSoundLibraryの設定に従う</param>
     /// <returns>止めたり速度を変えたりするためのハンドル。鳴らなかったときは SoundHandle.None</returns>
-    public SoundHandle PlaySe(string id, float volumeScale = 1f, bool? loop = null, float? pitch = null)
+    public SoundHandle PlaySe(string id, float volumeScale = 1f, bool? loop = null, float? pitch = null,
+        float? fadeInSeconds = null)
     {
         if (!TryGetEntry(id, out var entry)) return SoundHandle.None;
 
@@ -175,16 +193,16 @@ public class SoundManager : MonoBehaviour
 
         _lastPlayTime[id] = now;
         voice.Begin(entry, volumeScale, RandomizePitch(pitch ?? entry.pitch, entry),
-            loop ?? entry.loop, fadeInSeconds: 0f);
+            loop ?? entry.loop, fadeInSeconds ?? entry.fadeInSeconds);
         return new SoundHandle(voice);
     }
 
-    /// <summary>鳴っているSEをすべて止める</summary>
-    public void StopAllSe(float fadeSeconds = 0f)
+    /// <summary>鳴っているSEをすべて止める。秒数を省略すると、それぞれの音のフェードアウト設定に従う</summary>
+    public void StopAllSe(float? fadeSeconds = null)
     {
         foreach (var voice in _seVoices)
         {
-            voice.Stop(fadeSeconds);
+            voice.Stop(fadeSeconds ?? voice.DefaultFadeOutSeconds);
         }
     }
 
@@ -194,8 +212,12 @@ public class SoundManager : MonoBehaviour
     /// BGMを流す。別の曲が流れていたら、fadeSeconds かけてクロスフェードで切り替える。
     /// 同じ曲が既に流れていれば何もしない(シーンをまたいでも最初から再生し直さない)。
     /// </summary>
+    /// <param name="fadeSeconds">
+    /// クロスフェードの秒数。省略すると「前の曲のフェードアウト設定」と「新しい曲のフェードイン設定」を使う
+    /// </param>
     /// <param name="restartIfSame">true なら同じ曲でも最初から流し直す</param>
-    public SoundHandle PlayBgm(string id, float fadeSeconds = DefaultBgmFadeSeconds, bool restartIfSame = false)
+    /// <param name="loop">ループするか。省略するとSoundLibraryの設定に従う</param>
+    public SoundHandle PlayBgm(string id, float? fadeSeconds = null, bool restartIfSame = false, bool? loop = null)
     {
         if (!TryGetEntry(id, out var entry)) return SoundHandle.None;
 
@@ -212,21 +234,21 @@ public class SoundManager : MonoBehaviour
         }
 
         // 今の曲をフェードアウトさせ、もう片方のチャンネルで新しい曲をフェードインさせる
-        CurrentBgm.Stop(fadeSeconds);
+        CurrentBgm.Stop(fadeSeconds ?? CurrentBgm.DefaultFadeOutSeconds);
         _currentBgmIndex = 1 - _currentBgmIndex;
 
         // 前回のクロスフェードがまだ終わっていない場合は、残っている古い曲をすぐ止めて上書きする
         CurrentBgm.Begin(entry, 1f, RandomizePitch(entry.pitch, entry),
-            entry.loop, fadeSeconds);
+            loop ?? entry.loop, fadeSeconds ?? entry.fadeInSeconds);
         return new SoundHandle(CurrentBgm);
     }
 
-    /// <summary>BGMを止める(デフォルトは0.5秒でフェードアウト)</summary>
-    public void StopBgm(float fadeSeconds = DefaultBgmFadeSeconds)
+    /// <summary>BGMを止める。秒数を省略すると、その曲のフェードアウト設定に従う</summary>
+    public void StopBgm(float? fadeSeconds = null)
     {
         foreach (var voice in _bgmVoices)
         {
-            voice.Stop(fadeSeconds);
+            voice.Stop(fadeSeconds ?? voice.DefaultFadeOutSeconds);
         }
     }
 
@@ -249,7 +271,7 @@ public class SoundManager : MonoBehaviour
     // ───────────── 全体 ─────────────
 
     /// <summary>BGMもSEもすべて止める</summary>
-    public void StopAll(float fadeSeconds = 0f)
+    public void StopAll(float? fadeSeconds = null)
     {
         StopBgm(fadeSeconds);
         StopAllSe(fadeSeconds);
@@ -296,7 +318,16 @@ public class SoundManager : MonoBehaviour
         _muted[(int)type] = muted;
     }
 
-    private float EffectiveVolume(VolumeType type) => _muted[(int)type] ? 0f : _volumes[(int)type];
+    // 設定画面のスライダーの値(0〜1)を、実際の音の大きさに直す。
+    // 人の耳は音の大きさの変化を「割合」で感じるので、値をそのまま掛けると
+    // 「半分にしてもほとんど小さくならず、0の近くで急に消える」と感じる。
+    // 2乗にすると、スライダーの動きと聞こえ方がだいたい一致する(0.5 で 0.25 倍 ≒ -12dB)。
+    private float EffectiveVolume(VolumeType type)
+    {
+        if (_muted[(int)type]) return 0f;
+        float v = _volumes[(int)type];
+        return v * v;
+    }
 
     private void LoadVolumes()
     {
