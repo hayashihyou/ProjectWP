@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// AudioSource 1つ分の「再生チャンネル」。SoundManager の内部でだけ使う。
@@ -25,6 +25,9 @@ internal sealed class SoundVoice
 
     /// <summary>フェードアウトして止まる途中かどうか</summary>
     public bool IsStopping => _fading && _stopAfterFade;
+
+    /// <summary>秒数を指定せずに止めたときのフェードアウト秒数(SoundLibrary の設定)</summary>
+    public float DefaultFadeOutSeconds => Entry != null ? Entry.fadeOutSeconds : 0f;
 
     private float _volumeScale = 1f; // 鳴らすときに個別に指定された音量倍率
     private float _loopFadeSeconds;  // 0 より大きければ、曲終わりをこの秒数でフェードさせて自分でループする

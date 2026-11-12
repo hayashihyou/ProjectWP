@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 【テスト用】演出をボタンでもう一度再生して確認するためのパネル。SoundTester のエフェクト版。
+/// 【テスト用】演出をボタンでもう一度再生して確認するためのパネル。
 /// 最初のシーン(01_Title)の空のGameObjectに付けて Play する。シーンをまたいでも残る。
 ///
 /// 画面右側のパネルに、今いるシーンで EffectReplayRegistry に登録されている演出が

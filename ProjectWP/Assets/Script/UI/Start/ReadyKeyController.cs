@@ -92,6 +92,7 @@ public class ReadyKeyController : MonoBehaviour
     private void Update()
     {
         if (!playOnKey) return;
+        if (GameInputLock.IsLocked) return; // 設定画面などを開いている間は反応しない
         if (!IsKeyPressedThisFrame()) return;
 
         if (readyMode == ReadyMode.SameButtonPressCount) PressSameButton();
