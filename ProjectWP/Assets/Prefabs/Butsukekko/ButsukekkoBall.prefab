@@ -353,7 +353,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   pickupRadius: 0.8
   pickupCooldown: 0.5
-  releaseDelay: 0.35
+  releaseDelay: 0.9
   throwForwardSpeed: 12
   throwUpSpeed: 2
   hitRadius: 0.5

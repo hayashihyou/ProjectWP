@@ -10,12 +10,14 @@ public class MobileRuntimeSettings : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Apply()
     {
-        if(!Application.isMobilePlatform) return;
+        // PCもスマホも60fpsを上限にする
+        // PCは何も指定しないと上限なしで回り続け、MPPMで4人分動かすと
+        // GPS・CPUを取り合って、遊ぶほどだんだん処理が遅くなるため
+        Application.targetFrameRate = 60;
+
+        if (!Application.isMobilePlatform) return;
 
         // ゲーム中は触ってなくても画面が消えないようにする
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
-
-        // スマホ/タブレットは何も指定しないと30fpsになってしまうので、pcと同じ60fpsにする
-        Application.targetFrameRate = 60;
     }
 }
