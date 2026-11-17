@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 通信の状態を画面の左上に表示する、調査用の道具。F3 キーで表示/非表示。
+/// 通信の状態を画面の左上に表示する、調査用の道具。F3 キーで表示/非表示(最初は非表示)。
 /// エディターと Development Build でだけ動く(シーンに置かなくても、起動時に自動で作られる)。
 ///
 /// 「遊ぶほどラグが増える」ときの見分け方:
@@ -17,7 +17,7 @@ public class NetworkStatsOverlay : MonoBehaviour
     private const float SampleSeconds = 1f;       // FPS を数える区切り(秒)
     private const float LogIntervalSeconds = 10f; // Console に出す間隔(秒)
 
-    private bool visible = true;
+    private bool visible = false; // 最初は出さない(F3 で表示)
 
     private int frames;
     private float sampleTimer;

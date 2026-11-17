@@ -39,7 +39,7 @@ public class MinigameSelectButton : MonoBehaviour
         button.onClick.AddListener(OnClicked);
 
         // ●の上の吹き出しに名前を入れる(遊べないものは「準備中」をつける)
-        if (nameText != null) { nameText.text = isAvailable ? displayName : displayName + "\n(準備中)"; }
+        if (nameText != null) { nameText.SetRubyText(isAvailable ? displayName : displayName + "\n({準備中|じゅんびちゅう})"); }
     }
 
     private void OnDestroy()

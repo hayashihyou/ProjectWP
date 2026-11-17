@@ -1145,8 +1145,8 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_Camera: {fileID: 316146562}
+  m_PlaneDistance: 0.35000002
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -4121,7 +4121,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: -50, y: 37.5}
-  m_SizeDelta: {x: 260, y: 45}
+  m_SizeDelta: {x: 400, y: 70}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &410024322
 MonoBehaviour:
@@ -17375,6 +17375,7 @@ GameObject:
   - component: {fileID: 1916323262}
   - component: {fileID: 1916323264}
   - component: {fileID: 1916323263}
+  - component: {fileID: 1916323265}
   m_Layer: 0
   m_Name: GameStartButton_Label
   m_TagString: Untagged
@@ -17398,7 +17399,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -6}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1916323263
@@ -17501,6 +17502,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1916323261}
   m_CullTransparentMesh: 1
+--- !u!114 &1916323265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916323261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.6
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries: []
+  lastText: "\u30B2\u30FC\u30E0\u30B9\u30BF\u30FC\u30C8"
 --- !u!1001 &1944775987
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17945,6 +17967,7 @@ GameObject:
   - component: {fileID: 1985624855}
   - component: {fileID: 1985624854}
   - component: {fileID: 1985624856}
+  - component: {fileID: 1985624857}
   m_Layer: 0
   m_Name: ParticipantListHeader
   m_TagString: Untagged
@@ -17968,7 +17991,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 60, y: -20}
+  m_AnchoredPosition: {x: 60, y: -40}
   m_SizeDelta: {x: 500, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1985624854
@@ -18086,6 +18109,39 @@ MonoBehaviour:
   pcScale: 1
   tabletScale: 1.3
   phoneScale: 1.8
+--- !u!114 &1985624857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985624852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 0428bb4f1ec5489b89dac247e364c47e
+    start: 0
+    length: 3
+    baseText: "\u53C2\u52A0\u8005"
+    reading: "\u3055\u3093\u304B\u3057\u3083"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u53C2\u52A0\u8005\u30EA\u30B9\u30C8"
 --- !u!1001 &2001967666
 PrefabInstance:
   m_ObjectHideFlags: 0

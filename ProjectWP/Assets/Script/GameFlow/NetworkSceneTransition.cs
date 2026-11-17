@@ -68,11 +68,11 @@ public class NetworkSceneTransition : MonoBehaviour
     [Tooltip("参加者の画面にお知らせを出してから、タイトルに戻り始めるまでの秒数")]
     [SerializeField] private float hostLeftNoticeSeconds = 2.5f;
 
-    private const string HostDisbandedNotice = "ホストが部屋を解散しました。\nタイトルに戻ります。";
-    private const string HostDisconnectedNotice = "ホストとの接続が切れました。\nタイトルに戻ります。";
+    private const string HostDisbandedNotice = "ホストが{部屋|へや}を{解散|かいさん}しました。\nタイトルに{戻|もど}ります。";
+    private const string HostDisconnectedNotice = "ホストとの{接続|せつぞく}が{切|き}れました。\nタイトルに{戻|もど}ります。";
 
     // 自分の読み込みが終わって、他の人の読み込みを待っている間に出すお知らせ
-    private const string WaitingForOthersNotice = "他の人の読み込みを待っています。少々お待ちください";
+    private const string WaitingForOthersNotice = "{他|ほか}の{人|ひと}の{読|よ}み{込|こ}みを{待|ま}っています。{少々|しょうしょう}お{待|ま}ちください";
 
     [Header("ローディング表示")]
     [Tooltip("ONにすると、暗くなっている間だけSceneLoaderのローディング表示(バー)を出す。OFFなら今までどおり暗転だけ")]
@@ -489,7 +489,7 @@ public class NetworkSceneTransition : MonoBehaviour
         // ホストが切断しても、通信の状態によっては参加者側で「切断された」がすぐに分からず
         // (Relayからの切断の知らせが届かない等)、その参加者だけミニゲームの画面に取り残されることがあるため。
         // ここで戻り始めれば isLeaving が立つので、後から切断が分かっても OnNetworkStopped で二重には動かない。
-        Debug.Log($"[NetworkSceneTransition] {HostDisbandedNotice.Replace("\n", "")}");
+        Debug.Log($"[NetworkSceneTransition] {RubyText.Strip(HostDisbandedNotice).Replace("\n", "")}");
         ReturnToTitleAsync(HostDisbandedNotice).Forget();
     }
 

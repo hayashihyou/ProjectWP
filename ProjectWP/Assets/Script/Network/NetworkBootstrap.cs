@@ -105,7 +105,7 @@ public class NetworkBootstrap : MonoBehaviour
 
     private async Task SignInAsync()
     {
-        SetStatus("サインイン中...");
+        SetStatus("サインイン{中|ちゅう}...");
 
         // UnityServices自体がまだ初期化されていなければ初期化する。
         // 注意: AuthenticationService.Instance は、UnityServicesの初期化が
@@ -181,7 +181,7 @@ public class NetworkBootstrap : MonoBehaviour
     {
         await EnsureSignedInAsync();
 
-        SetStatus("部屋を作成中...");
+        SetStatus("{部屋|へや}を{作成中|さくせいちゅう}...");
 
         // Relayサーバー上に部屋を確保してもらう。
         // maxConnectionsは「自分以外」が入れる最大人数。
@@ -225,7 +225,7 @@ public class NetworkBootstrap : MonoBehaviour
         // 遷移の完了は待たなくてよいので、Forget()で投げっぱなしにする。
         NetworkSceneTransition.Instance.LoadSceneForAllAsync(SceneNames.PlayerJoin).Forget();
 
-        SetStatus("ホストとして開始しました。");
+        SetStatus("ホストとして{開始|かいし}しました。");
     }
 
     // ============================== 参加側 ==============================
@@ -244,7 +244,7 @@ public class NetworkBootstrap : MonoBehaviour
     {
         await EnsureSignedInAsync();
 
-        SetStatus("部屋に参加中...");
+        SetStatus("{部屋|へや}に{参加中|さんかちゅう}...");
 
         // 参加コードから、ホストが作った部屋の情報をRelayサーバーに教えてもらう
         JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
@@ -264,13 +264,13 @@ public class NetworkBootstrap : MonoBehaviour
             // Netcodeのクライアントとして接続を開始する
             NetworkManager.Singleton.StartClient();
 
-            SetStatus("接続中...");
+            SetStatus("{接続中|せつぞくちゅう}...");
 
             bool connected = await connectionResult.Task;
             if (!connected)
             {
                 string reason = string.IsNullOrEmpty(NetworkManager.Singleton.DisconnectReason)
-                    ? "接続できませんでした。"
+                    ? "{接続|せつぞく}できませんでした。"
                     : NetworkManager.Singleton.DisconnectReason;
                 throw new Exception(reason);
             }
@@ -372,7 +372,7 @@ public class NetworkBootstrap : MonoBehaviour
 
     public void SetStatus(string message)
     {
-        Debug.Log($"[NetworkBootstrap] {message}");
-        if (statusText != null) statusText.text = message;
+        Debug.Log($"[NetworkBootstrap] {RubyText.Strip(message)}");
+        if (statusText != null) statusText.SetRubyText(message);
     }
 }

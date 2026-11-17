@@ -166,7 +166,7 @@ MonoBehaviour:
   order: 2
   labelAnchor: {fileID: 455913093}
   rankLabel: {fileID: 356428352}
-  labelFormat: "{0}<size=25>\u4F4D</size>"
+  labelFormat: "{0}<size=25>{\u4F4D|\u3044}</size>"
   labelWorldOffset: {x: 0, y: -1, z: 0}
   lockLabelScreenHeight: 0
   labelScreenHeight01: 0.015
@@ -233,7 +233,7 @@ MonoBehaviour:
   order: 1
   labelAnchor: {fileID: 1068695427}
   rankLabel: {fileID: 493133580}
-  labelFormat: "{0}<size=25>\u4F4D</size>"
+  labelFormat: "{0}<size=25>{\u4F4D|\u3044}</size>"
   labelWorldOffset: {x: 0, y: -1, z: 0}
   lockLabelScreenHeight: 0
   labelScreenHeight01: 0.015
@@ -459,6 +459,7 @@ GameObject:
   - component: {fileID: 356428353}
   - component: {fileID: 356428352}
   - component: {fileID: 356428351}
+  - component: {fileID: 356428354}
   m_Layer: 0
   m_Name: No2
   m_TagString: Untagged
@@ -632,6 +633,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 356428349}
   m_CullTransparentMesh: 1
+--- !u!114 &356428354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 356428349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.65
+  gap: 3
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: ce0abc84baa24090a92e599a1b8781c8
+    start: 10
+    length: 1
+    baseText: "\u4F4D"
+    reading: "\u3044"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "2<size=25>\u4F4D"
 --- !u!1 &375534470
 GameObject:
   m_ObjectHideFlags: 0
@@ -669,6 +703,7 @@ MonoBehaviour:
   - {r: 0.6, g: 1, b: 0.2, a: 1}
   targetCamera: {fileID: 0}
   alignToCamera: 1
+  faceCamera: 1
 --- !u!4 &375534472
 Transform:
   m_ObjectHideFlags: 0
@@ -872,7 +907,7 @@ MonoBehaviour:
   order: 4
   labelAnchor: {fileID: 414792011}
   rankLabel: {fileID: 1226678140}
-  labelFormat: "{0}<size=25>\u4F4D</size>"
+  labelFormat: "{0}<size=25>{\u4F4D|\u3044}</size>"
   labelWorldOffset: {x: 0, y: -1, z: 0}
   lockLabelScreenHeight: 0
   labelScreenHeight01: 0.015
@@ -977,6 +1012,7 @@ GameObject:
   - component: {fileID: 493133580}
   - component: {fileID: 493133579}
   - component: {fileID: 493133578}
+  - component: {fileID: 493133582}
   m_Layer: 0
   m_Name: No1
   m_TagString: Untagged
@@ -1206,6 +1242,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 493133576}
   m_CullTransparentMesh: 1
+--- !u!114 &493133582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 493133576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.65
+  gap: 3
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 799357b0055549f49f6013977b50979c
+    start: 10
+    length: 1
+    baseText: "\u4F4D"
+    reading: "\u3044"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "1<size=25>\u4F4D"
 --- !u!1 &619018505
 GameObject:
   m_ObjectHideFlags: 0
@@ -1218,6 +1287,7 @@ GameObject:
   - component: {fileID: 619018509}
   - component: {fileID: 619018508}
   - component: {fileID: 619018507}
+  - component: {fileID: 619018510}
   m_Layer: 0
   m_Name: No3
   m_TagString: Untagged
@@ -1391,6 +1461,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 619018505}
   m_CullTransparentMesh: 1
+--- !u!114 &619018510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 619018505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.65
+  gap: 3
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: efa3495d48534b6589946d0bd742816e
+    start: 10
+    length: 1
+    baseText: "\u4F4D"
+    reading: "\u3044"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "3<size=25>\u4F4D"
 --- !u!1 &753169196
 GameObject:
   m_ObjectHideFlags: 0
@@ -1438,7 +1541,7 @@ MonoBehaviour:
   order: 3
   labelAnchor: {fileID: 993445920}
   rankLabel: {fileID: 619018508}
-  labelFormat: "{0}<size=25>\u4F4D</size>"
+  labelFormat: "{0}<size=25>{\u4F4D|\u3044}</size>"
   labelWorldOffset: {x: 0, y: -1, z: 0}
   lockLabelScreenHeight: 0
   labelScreenHeight01: 0.015
@@ -1469,6 +1572,7 @@ GameObject:
   - component: {fileID: 852466459}
   - component: {fileID: 852466461}
   - component: {fileID: 852466460}
+  - component: {fileID: 852466462}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1524,7 +1628,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4281479730
   m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -1537,17 +1641,17 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
+  m_fontSize: 40
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 20
-  m_fontSizeMax: 48
+  m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -1581,7 +1685,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 10, y: 14, z: 10, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1595,6 +1699,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 852466458}
   m_CullTransparentMesh: 1
+--- !u!114 &852466462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852466458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: e57b743652624b5a8f8be1abf31c0955
+    start: 5
+    length: 2
+    baseText: "\u9078\u629E"
+    reading: "\u305B\u3093\u305F\u304F"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  - id: 1723fd1074384ae3b6c13a63133c70dd
+    start: 8
+    length: 1
+    baseText: "\u623B"
+    reading: "\u3082\u3069"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u30DF\u30CB\u30B2\u30FC\u30E0\u9078\u629E\u306B\u623B\u308B"
 --- !u!1 &942091658
 GameObject:
   m_ObjectHideFlags: 0
@@ -1688,7 +1837,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -1770,9 +1919,9 @@ RectTransform:
   - {fileID: 1658338973}
   m_Father: {fileID: 1975136268}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -45}
   m_SizeDelta: {x: 500, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &996375352
@@ -1891,9 +2040,9 @@ RectTransform:
   - {fileID: 2024567231}
   m_Father: {fileID: 1975136268}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -265}
   m_SizeDelta: {x: 500, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1052572636
@@ -2026,6 +2175,7 @@ GameObject:
   - component: {fileID: 1226678141}
   - component: {fileID: 1226678140}
   - component: {fileID: 1226678139}
+  - component: {fileID: 1226678142}
   m_Layer: 0
   m_Name: No4
   m_TagString: Untagged
@@ -2199,6 +2349,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1226678137}
   m_CullTransparentMesh: 1
+--- !u!114 &1226678142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226678137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.65
+  gap: 3
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: f04b0860531e40ac81537d7d712d6986
+    start: 10
+    length: 1
+    baseText: "\u4F4D"
+    reading: "\u3044"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "4<size=25>\u4F4D"
 --- !u!1 &1275343401
 GameObject:
   m_ObjectHideFlags: 0
@@ -2344,14 +2527,14 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 10
@@ -2387,6 +2570,7 @@ GameObject:
   - component: {fileID: 1658338973}
   - component: {fileID: 1658338975}
   - component: {fileID: 1658338974}
+  - component: {fileID: 1658338976}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -2442,7 +2626,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4281479730
   m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -2455,17 +2639,17 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
+  m_fontSize: 40
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 20
-  m_fontSizeMax: 48
+  m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -2499,7 +2683,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 10, y: 14, z: 10, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2513,6 +2697,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1658338972}
   m_CullTransparentMesh: 1
+--- !u!114 &1658338976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658338972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: ca63c46286784be38888aecf6a9bab7b
+    start: 2
+    length: 2
+    baseText: "\u4E00\u5EA6"
+    reading: "\u3044\u3061\u3069"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  - id: 0512c626842d4ac6a33b7ad377a09afa
+    start: 4
+    length: 1
+    baseText: "\u904A"
+    reading: "\u3042\u305D"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u3082\u3046\u4E00\u5EA6\u904A\u3076"
 --- !u!1 &1723719159
 GameObject:
   m_ObjectHideFlags: 0
@@ -2603,7 +2832,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -2699,6 +2928,7 @@ GameObject:
   - component: {fileID: 1974979111}
   - component: {fileID: 1974979113}
   - component: {fileID: 1974979112}
+  - component: {fileID: 1974979114}
   m_Layer: 5
   m_Name: WaitingText
   m_TagString: Untagged
@@ -2720,10 +2950,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1975136268}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -365}
+  m_SizeDelta: {x: 600, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1974979112
 MonoBehaviour:
@@ -2767,7 +2997,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -2779,8 +3009,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -2789,7 +3019,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -2825,6 +3055,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1974979110}
   m_CullTransparentMesh: 1
+--- !u!114 &1974979114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974979110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 08f72deb7b2e42a3a7861977f5abedfd
+    start: 4
+    length: 1
+    baseText: "\u9078"
+    reading: "\u3048\u3089"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u30DB\u30B9\u30C8\u304C\u9078\u3093\u3067\u3044\u307E\u3059"
 --- !u!1 &1975136267
 GameObject:
   m_ObjectHideFlags: 0
@@ -2902,6 +3165,7 @@ GameObject:
   - component: {fileID: 2024567231}
   - component: {fileID: 2024567233}
   - component: {fileID: 2024567232}
+  - component: {fileID: 2024567234}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -2957,7 +3221,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4281479730
   m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -2970,17 +3234,17 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
+  m_fontSize: 40
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 20
-  m_fontSizeMax: 48
+  m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -3014,7 +3278,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 10, y: 14, z: 10, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3028,6 +3292,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2024567230}
   m_CullTransparentMesh: 1
+--- !u!114 &2024567234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024567230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 182c4532c0c44a549ea47a296c6b24fa
+    start: 5
+    length: 1
+    baseText: "\u623B"
+    reading: "\u3082\u3069"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u30BF\u30A4\u30C8\u30EB\u306B\u623B\u308B"
 --- !u!1 &2044891551
 GameObject:
   m_ObjectHideFlags: 0
@@ -3062,9 +3359,9 @@ RectTransform:
   - {fileID: 852466459}
   m_Father: {fileID: 1975136268}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -155}
   m_SizeDelta: {x: 500, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2044891553

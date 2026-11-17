@@ -26,7 +26,7 @@ public class GameStartButton : MonoBehaviour
     private const string NextSceneName = SceneNames.StageSelect;
 
     private const string HostLabelText = "ゲームスタート";
-    private const string WaitingForHostLabelText = "ホストの開始を待っています...";
+    private const string WaitingForHostLabelText = "ホストの{開始|かいし}を{待|ま}っています...";
 
     private void Start()
     {
@@ -47,7 +47,7 @@ public class GameStartButton : MonoBehaviour
         TMP_Text label = GetComponentInChildren<TMP_Text>();
         if (label != null)
         {
-            label.text = isHost ? HostLabelText : WaitingForHostLabelText;
+            label.SetRubyText(isHost ? HostLabelText : WaitingForHostLabelText);
         }
 
         // ホストの場合、ゲームパッド/キーボードのAボタン(決定)ですぐ押せるように

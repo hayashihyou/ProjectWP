@@ -24,7 +24,7 @@ public class ScreenNotice : MonoBehaviour
 
     public void Show(string message)
     {
-        if (noticeText != null) noticeText.text = message;
+        if (noticeText != null) noticeText.SetRubyText(message);
         if (noticeRoot != null) noticeRoot.SetActive(true);
     }
 
