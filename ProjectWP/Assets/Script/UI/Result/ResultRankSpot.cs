@@ -26,8 +26,8 @@ public class ResultRankSpot : MonoBehaviour
     [Tooltip("順位を書き換える文字(同着のときに使う)。空なら書き換えない")]
     [SerializeField] private TMP_Text rankLabel;
 
-    [Tooltip("順位の書き方。{0} に順位が入る")]
-    [SerializeField] private string labelFormat = "{0}<size=25>位</size>";
+    [Tooltip("順位の書き方。{0} に順位が入る。{位|い} のように書くとルビが付く")]
+    [SerializeField] private string labelFormat = "{0}<size=25>{位|い}</size>";
 
     [Tooltip("キャラクターの足元から、どこに文字を出すか")]
     [SerializeField] private Vector3 labelWorldOffset = new Vector3(0f, 1.4f, 0f);
@@ -88,7 +88,7 @@ public class ResultRankSpot : MonoBehaviour
 
         if (rankLabel != null)
         {
-            rankLabel.text = string.Format(labelFormat, entry.Rank);
+            rankLabel.SetRubyText(labelFormat.Replace("{0}", entry.Rank.ToString()));
         }
 
         if (labelAnchor != null)

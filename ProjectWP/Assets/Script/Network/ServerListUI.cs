@@ -148,7 +148,7 @@ public class ServerListUI : MonoBehaviour
     {
         await NetworkBootstrap.Instance.EnsureSignedInAsync();
 
-        NetworkBootstrap.Instance.SetStatus("サーバーを探しています...");
+        NetworkBootstrap.Instance.SetStatus("サーバーを{探|さが}しています...");
 
         QueryResponse response;
         try
@@ -157,7 +157,7 @@ public class ServerListUI : MonoBehaviour
         }
         catch (Exception e)
         {
-            NetworkBootstrap.Instance.SetStatus($"サーバー一覧の取得に失敗しました: {e.Message}");
+            NetworkBootstrap.Instance.SetStatus($"サーバー{{一覧|いちらん}}の{{取得|しゅとく}}に{{失敗|しっぱい}}しました: {e.Message}");
             Debug.LogException(e);
             return;
         }
@@ -189,7 +189,7 @@ public class ServerListUI : MonoBehaviour
             }
         }
 
-        NetworkBootstrap.Instance.SetStatus("サーバーを選んでください。");
+        NetworkBootstrap.Instance.SetStatus("サーバーを{選|えら}んでください。");
     }
 
     private async void OnServerRowClicked(int index)
@@ -213,7 +213,7 @@ public class ServerListUI : MonoBehaviour
         }
         catch (Exception e)
         {
-            NetworkBootstrap.Instance.SetStatus($"接続に失敗しました: {e.Message}");
+            NetworkBootstrap.Instance.SetStatus($"{{接続|せつぞく}}に{{失敗|しっぱい}}しました: {e.Message}");
             Debug.LogException(e);
             SetServerRowsInteractable(true);
         }
@@ -223,7 +223,7 @@ public class ServerListUI : MonoBehaviour
 
     private async Task HostServerAsync(int index)
     {
-        NetworkBootstrap.Instance.SetStatus($"{ServerNames[index]} を起動しています...");
+        NetworkBootstrap.Instance.SetStatus($"{ServerNames[index]} を{{起動|きどう}}しています...");
 
         // まずRelayの部屋だけ確保する(この時点ではまだホストとして起動しない)
         string joinCode = await NetworkBootstrap.Instance.PrepareRelayHostAsync();
@@ -275,7 +275,7 @@ public class ServerListUI : MonoBehaviour
 
     private async Task JoinServerAsync(string lobbyId, string serverName)
     {
-        NetworkBootstrap.Instance.SetStatus($"{serverName} に参加しています...");
+        NetworkBootstrap.Instance.SetStatus($"{serverName} に{{参加|さんか}}しています...");
 
         // Lobbyに参加する(これで「参加人数」に自分がカウントされるようになる)
         Lobby lobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
@@ -286,7 +286,7 @@ public class ServerListUI : MonoBehaviour
         // Lobbyに保存されている参加コードを取り出して、それでRelayに接続する
         if (lobby.Data == null || !lobby.Data.TryGetValue(RelayJoinCodeKey, out DataObject joinCodeData))
         {
-            NetworkBootstrap.Instance.SetStatus("このサーバーには参加コードがありません(内部エラー)。");
+            NetworkBootstrap.Instance.SetStatus("このサーバーには{参加|さんか}コードがありません({内部|ないぶ}エラー)。");
             return;
         }
 

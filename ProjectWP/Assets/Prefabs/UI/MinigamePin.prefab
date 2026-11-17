@@ -161,6 +161,7 @@ GameObject:
   - component: {fileID: 6676356173355675868}
   - component: {fileID: 9212472348119894161}
   - component: {fileID: 1260430925946666716}
+  - component: {fileID: 1163682867861979487}
   m_Layer: 5
   m_Name: NameText
   m_TagString: Untagged
@@ -242,8 +243,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26
-  m_fontSizeBase: 26
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -255,7 +256,7 @@ MonoBehaviour:
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: 50
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -287,6 +288,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1163682867861979487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5198763781640816872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.6
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 7d5a650041cf41d2ab85fa543f05de19
+    start: 5
+    length: 1
+    baseText: "\u540D"
+    reading: "\u3081\u3044"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u30DF\u30CB\u30B2\u30FC\u30E0\u540D"
 --- !u!1 &6833361633457810185
 GameObject:
   m_ObjectHideFlags: 0
@@ -455,7 +489,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 20
     m_Right: 20
-    m_Top: 8
+    m_Top: 26
     m_Bottom: 10
   m_ChildAlignment: 4
   m_Spacing: 0

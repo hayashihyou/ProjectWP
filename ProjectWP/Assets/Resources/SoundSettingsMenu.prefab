@@ -816,6 +816,7 @@ GameObject:
   - component: {fileID: 6935829394262427443}
   - component: {fileID: 4188309328346399603}
   - component: {fileID: 6161770227990037756}
+  - component: {fileID: 7941132124584772563}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -936,12 +937,45 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 12, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7941132124584772563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2483569174422414223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 4b77ae0b0ef148dfb5effe19e007611c
+    start: 0
+    length: 1
+    baseText: "\u9589"
+    reading: "\u3068"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u9589\u3058\u308B"
 --- !u!1 &2483622565235436315
 GameObject:
   m_ObjectHideFlags: 0
@@ -1600,6 +1634,7 @@ GameObject:
   - component: {fileID: 4993723596689992636}
   - component: {fileID: 9114087184050923871}
   - component: {fileID: 5620699236331442907}
+  - component: {fileID: 2950639658821485616}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -1746,6 +1781,39 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2950639658821485616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4919565308651810834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 829ba9f21e3b44d38657e6219de03e4f
+    start: 4
+    length: 2
+    baseText: "\u8A2D\u5B9A"
+    reading: "\u305B\u3063\u3066\u3044"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u30B5\u30A6\u30F3\u30C9\u8A2D\u5B9A"
 --- !u!1 &5076582694608184312
 GameObject:
   m_ObjectHideFlags: 0

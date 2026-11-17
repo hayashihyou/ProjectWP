@@ -112,7 +112,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4796832815519352550
 CanvasRenderer:
@@ -204,7 +204,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 32.5}
+  m_AnchoredPosition: {x: 0, y: 42.5}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4307769760240122553
@@ -343,7 +343,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8956959621714629844
 CanvasRenderer:
@@ -431,7 +431,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 22.5}
+  m_AnchoredPosition: {x: 0, y: 32.5}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8408386557857728192
@@ -643,7 +643,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &188491587448535895
 CanvasRenderer:
@@ -737,7 +737,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2411159153926850193
 CanvasRenderer:
@@ -802,6 +802,7 @@ GameObject:
   - component: {fileID: 3216562851316302368}
   - component: {fileID: 2301526744740524751}
   - component: {fileID: 7886949482660000072}
+  - component: {fileID: 8956687383095378553}
   m_Layer: 0
   m_Name: readyText
   m_TagString: Untagged
@@ -825,8 +826,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 40}
+  m_AnchoredPosition: {x: 0, y: -6}
+  m_SizeDelta: {x: 150, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2301526744740524751
 CanvasRenderer:
@@ -883,8 +884,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 28
+  m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -928,6 +929,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8956687383095378553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216302441770055912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 1d446382d8a44ef797c7824ff8449be2
+    start: 0
+    length: 3
+    baseText: "\u6E96\u5099\u4E2D"
+    reading: "\u3058\u3085\u3093\u3073\u3061\u3085\u3046"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u6E96\u5099\u4E2D"
 --- !u!1 &1402120348509743857
 GameObject:
   m_ObjectHideFlags: 0
@@ -964,7 +998,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8472303286371816466
 CanvasRenderer:
@@ -1052,7 +1086,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2.5}
   m_SizeDelta: {x: 80, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9090536382248437402
@@ -1189,7 +1223,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2.5}
   m_SizeDelta: {x: 80, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6053731644545134260
@@ -1487,7 +1521,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3869929318076921139
 CanvasRenderer:
@@ -1579,7 +1613,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2.5}
   m_SizeDelta: {x: 80, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5854667710225446857
@@ -1718,7 +1752,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3208884427168909790
 CanvasRenderer:
@@ -1812,7 +1846,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 70}
+  m_SizeDelta: {x: 150, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1806090911723998379
 CanvasRenderer:
@@ -2021,8 +2055,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 23}
-  m_SizeDelta: {x: 120, y: 25}
+  m_AnchoredPosition: {x: 0, y: 32.5}
+  m_SizeDelta: {x: 150, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2060940591430273703
 CanvasRenderer:
@@ -2075,7 +2109,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithIndependentRoundedCorners
   r: {x: 5, y: 5, z: 0, w: 0}
-  rect2props: {x: 0.0000076293945, y: -2.5, z: 49.49748, w: 49.49748}
+  rect2props: {x: 0.0000076293945, y: -2.5, z: 60.10408, w: 60.10408}
   image: {fileID: 971019492433657312}
 --- !u!1 &3531582622781255152
 GameObject:
@@ -2586,7 +2620,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 22.5}
+  m_AnchoredPosition: {x: 0, y: 32.5}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &240804952556011800
@@ -2723,7 +2757,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 22.5}
+  m_AnchoredPosition: {x: 0, y: 32.5}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7623610450860596465
@@ -3019,8 +3053,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 23}
-  m_SizeDelta: {x: 120, y: 25}
+  m_AnchoredPosition: {x: 0, y: 32.5}
+  m_SizeDelta: {x: 150, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9064812286212258605
 CanvasRenderer:
@@ -3073,7 +3107,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithIndependentRoundedCorners
   r: {x: 5, y: 5, z: 0, w: 0}
-  rect2props: {x: 0.0000076293945, y: -2.5, z: 49.49748, w: 49.49748}
+  rect2props: {x: 0.0000076293945, y: -2.5, z: 60.10408, w: 60.10408}
   image: {fileID: 264005934731690648}
 --- !u!1 &5493260907484653048
 GameObject:
@@ -3109,7 +3143,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2.5}
   m_SizeDelta: {x: 80, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6358039311613309835
@@ -3247,8 +3281,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 23}
-  m_SizeDelta: {x: 120, y: 25}
+  m_AnchoredPosition: {x: 0, y: 32.5}
+  m_SizeDelta: {x: 150, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3916178550428219045
 CanvasRenderer:
@@ -3301,7 +3335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithIndependentRoundedCorners
   r: {x: 5, y: 5, z: 0, w: 0}
-  rect2props: {x: 0.0000076293945, y: -2.5, z: 49.49748, w: 49.49748}
+  rect2props: {x: 0.0000076293945, y: -2.5, z: 60.10408, w: 60.10408}
   image: {fileID: 2907191864744897901}
 --- !u!1 &6154236981616261946
 GameObject:
@@ -3490,8 +3524,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 23}
-  m_SizeDelta: {x: 120, y: 25}
+  m_AnchoredPosition: {x: 0, y: 32.5}
+  m_SizeDelta: {x: 150, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6535999757691073357
 CanvasRenderer:
@@ -3544,7 +3578,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithIndependentRoundedCorners
   r: {x: 5, y: 5, z: 0, w: 0}
-  rect2props: {x: 0.0000076293945, y: -2.5, z: 49.49748, w: 49.49748}
+  rect2props: {x: 0.0000076293945, y: -2.5, z: 60.10408, w: 60.10408}
   image: {fileID: 625095372309644376}
 --- !u!1 &7321718454917272690
 GameObject:
@@ -3557,6 +3591,7 @@ GameObject:
   - component: {fileID: 2228163610417716937}
   - component: {fileID: 3316565469783341199}
   - component: {fileID: 8279335847205045397}
+  - component: {fileID: 2951331289263978189}
   m_Layer: 0
   m_Name: readyText
   m_TagString: Untagged
@@ -3580,8 +3615,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 40}
+  m_AnchoredPosition: {x: 0, y: -6}
+  m_SizeDelta: {x: 150, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3316565469783341199
 CanvasRenderer:
@@ -3638,8 +3673,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 28
+  m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3683,6 +3718,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2951331289263978189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7321718454917272690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 3ff257bbcd7c483192a94e90bf082be9
+    start: 0
+    length: 3
+    baseText: "\u6E96\u5099\u4E2D"
+    reading: "\u3058\u3085\u3093\u3073\u3061\u3085\u3046"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u6E96\u5099\u4E2D"
 --- !u!1 &7385158967597794558
 GameObject:
   m_ObjectHideFlags: 0
@@ -3974,6 +4042,7 @@ GameObject:
   - component: {fileID: 2002051446262097396}
   - component: {fileID: 8885223300294888462}
   - component: {fileID: 6536546479456389379}
+  - component: {fileID: 7497084929981880727}
   m_Layer: 0
   m_Name: readyText
   m_TagString: Untagged
@@ -3997,8 +4066,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 40}
+  m_AnchoredPosition: {x: 0, y: -6}
+  m_SizeDelta: {x: 150, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8885223300294888462
 CanvasRenderer:
@@ -4055,8 +4124,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 28
+  m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4100,6 +4169,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7497084929981880727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7960431552315077807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 483db1b2f0b34671bf407389409ffde8
+    start: 0
+    length: 3
+    baseText: "\u6E96\u5099\u4E2D"
+    reading: "\u3058\u3085\u3093\u3073\u3061\u3085\u3046"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u6E96\u5099\u4E2D"
 --- !u!1 &8101432368797959127
 GameObject:
   m_ObjectHideFlags: 0
@@ -4111,6 +4213,7 @@ GameObject:
   - component: {fileID: 6479796654041041892}
   - component: {fileID: 3783564894344741381}
   - component: {fileID: 1709268519989714193}
+  - component: {fileID: 2661063504823750680}
   m_Layer: 0
   m_Name: readyText
   m_TagString: Untagged
@@ -4134,8 +4237,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 40}
+  m_AnchoredPosition: {x: 0, y: -6}
+  m_SizeDelta: {x: 150, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3783564894344741381
 CanvasRenderer:
@@ -4192,8 +4295,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 28
+  m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4237,6 +4340,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2661063504823750680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8101432368797959127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226c091552bc64a48b3bf4ae6055fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoRuby.AutoRubyTMP
+  showRuby: 1
+  rubySizeRatio: 0.5
+  gap: 0
+  shrinkToFit: 1
+  minHorizontalScale: 0.6
+  autoGenerateOnEdit: 1
+  userDictionary: {fileID: 0}
+  entries:
+  - id: 628beff3498e4eddb5252305c8c7f32d
+    start: 0
+    length: 3
+    baseText: "\u6E96\u5099\u4E2D"
+    reading: "\u3058\u3085\u3093\u3073\u3061\u3085\u3046"
+    enabled: 1
+    manual: 1
+    sizeScale: 0
+    widthScale: 1
+    spacing: 0
+    align: 0
+    offset: {x: 0, y: 0}
+  lastText: "\u6E96\u5099\u4E2D"
 --- !u!1 &8175651824481183474
 GameObject:
   m_ObjectHideFlags: 0
