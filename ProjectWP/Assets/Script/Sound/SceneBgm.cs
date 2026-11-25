@@ -20,7 +20,7 @@ public static class SceneBgm
         { SceneNames.Title, "BGM_Title" },
         { SceneNames.PlayerJoin, "BGM_Lobby" },
         { SceneNames.StageSelect, "BGM_Lobby" },
-        { SceneNames.Stopwatch, "BGM_Stopwatch" },
+        { SceneNames.TometeJust, "BGM_Stopwatch" },
         { SceneNames.MinigameResult, "BGM_Result" }, // リザルトUIはミニゲームのシーンに重ねて読み込まれる
     };
 

@@ -6,7 +6,7 @@ using UnityEngine;
 /// シーンの StopwatchDesks(4つの机の親)に付ける。子にあるストップウォッチを自動で集める。
 ///
 /// ネットワークについて
-/// ・「誰が何秒で止めたか」は、サーバーの StopwatchMinigame が ServerSendEvent で全員に送っている
+/// ・「誰が何秒で止めたか」は、サーバーの TometeJustMinigame が ServerSendEvent で全員に送っている
 /// ・その出来事は MinigameInfo が各端末で受け取るので、ここでは MinigameInfo のイベントを聞くだけでよい
 ///   (このスクリプトに NetworkObject は不要。全員の端末で同じように動く)
 ///
@@ -131,11 +131,11 @@ public class StopwatchDeskDisplays : MonoBehaviour
     {
         if (!displays.TryGetValue(slot, out StopwatchDisplay d)) { return; }
 
-        if (eventName == StopwatchMinigame.StopEventName)
+        if (eventName == TometeJustMinigame.StopEventName)
         {
             d.Stop(value.FloatValue);   // 値 = 止めた秒数
         }
-        else if (eventName == StopwatchMinigame.TimeUpEventName)
+        else if (eventName == TometeJustMinigame.TimeUpEventName)
         {
             d.TimeUp(value.FloatValue); // 値 = 時間切れの秒数
         }

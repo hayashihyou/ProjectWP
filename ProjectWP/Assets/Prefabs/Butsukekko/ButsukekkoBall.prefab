@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 5849796884101629038}
   - component: {fileID: 9187835212392627000}
   m_Layer: 0
-  m_Name: PieBall
+  m_Name: ButsukekkoBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

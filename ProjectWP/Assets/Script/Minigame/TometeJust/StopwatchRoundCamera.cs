@@ -10,7 +10,7 @@ using UnityEngine;
 ///   明るくなる(RoundIntro)     → テレビに寄った画面のまま
 ///   「目標決定」の出来事        → holdSeconds 秒そのまま見せてから、returnSeconds 秒かけて元の位置へ戻る
 ///
-/// サーバーの StopwatchMinigame は、TargetDelaySeconds と SecondsAfterTarget を読んで待つ時間を決める。
+/// サーバーの TometeJustMinigame は、TargetDelaySeconds と SecondsAfterTarget を読んで待つ時間を決める。
 /// 秒数を変えるときは、ここ(このコンポーネント)だけを変えればよい。
 /// </summary>
 public class StopwatchRoundCamera : MonoBehaviour
@@ -82,7 +82,7 @@ public class StopwatchRoundCamera : MonoBehaviour
     // 目標時間が出たら、少し見せてから元の位置へ戻る
     private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
     {
-        if (eventName != StopwatchMinigame.TargetEventName) { return; }
+        if (eventName != TometeJustMinigame.TargetEventName) { return; }
         if (!zoomed) { return; } // 1ラウンド目(イントロ演出が映している)は何もしない
 
         if (returnRoutine != null) { StopCoroutine(returnRoutine); }

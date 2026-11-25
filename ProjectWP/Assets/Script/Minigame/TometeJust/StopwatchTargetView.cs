@@ -5,7 +5,7 @@ using UnityEngine;
 /// テレビに今のラウンドの目標時間を表示する。テレビの画面の文字(TextMeshPro)に付ける。
 ///
 /// ネットワークについて
-/// ・目標時間は、サーバーの StopwatchMinigame が「目標決定」の出来事で全員に送っている
+/// ・目標時間は、サーバーの TometeJustMinigame が「目標決定」の出来事で全員に送っている
 /// ・ここでは MinigameInfo の出来事を聞くだけでよい(NetworkObject は不要)
 /// </summary>
 public class StopwatchTargetView : MonoBehaviour
@@ -45,7 +45,7 @@ public class StopwatchTargetView : MonoBehaviour
     // 「目標決定」の出来事が届いたら、テレビの文字を書き換える
     private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
     {
-        if (eventName != StopwatchMinigame.TargetEventName) { return; }
+        if (eventName != TometeJustMinigame.TargetEventName) { return; }
 
         targetText.text = StopwatchTimeFormat.Format(value.FloatValue); // 例: 10秒 → "10:00"
     }

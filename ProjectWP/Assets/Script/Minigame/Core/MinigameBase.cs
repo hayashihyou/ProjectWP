@@ -897,7 +897,7 @@ public abstract class MinigameBase : NetworkBehaviour
         PlayerValueChangedRpc(slot, delta, value);
     }
 
-    /// <summary>今回のラウンドの値に足す(サーバーのみ)。例: パイが当たったら +1</summary>
+    /// <summary>今回のラウンドの値に足す(サーバーのみ)。例: ボールが当たったら +1</summary>
     protected void ServerAddValue(int slot, float delta)
     {
         int index = ServerFindPlayerIndexChecked(slot, nameof(ServerAddValue));

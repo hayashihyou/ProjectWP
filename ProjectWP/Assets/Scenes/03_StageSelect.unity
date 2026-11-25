@@ -845,11 +845,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: sceneName
-      value: MG_Stopwatch
+      value: MG_TometeJust
       objectReference: {fileID: 0}
     - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: displayName
-      value: "\u9023\u7D9A\u30B9\u30C8\u30C3\u30D7\u30A6\u30A9\u30C3\u30C1"
+      value: "\u6B62\u3081\u3066\u30B8\u30E3\u30B9\u30C8\uFF01"
       objectReference: {fileID: 0}
     - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: isAvailable
@@ -905,7 +905,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8911188977788746516, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Name
-      value: Pin_Stopwatch
+      value: Pin_TometeJust
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2061,11 +2061,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: sceneName
-      value: MG_PieThrow
+      value: MG_Butsukekko
       objectReference: {fileID: 0}
     - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: displayName
-      value: "\u30D1\u30A4\u6295\u3052"
+      value: "\u307F\u3093\u306A\u3067\u3076\u3064\u3051\u3063\u3053"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
+      propertyPath: minigameType
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6480715266510651035, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: minigameSelectManager
@@ -2113,7 +2117,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8911188977788746516, guid: a9ab0aa8b85637e42acfba8fa241ac37, type: 3}
       propertyPath: m_Name
-      value: Pin_PieThrow
+      value: Pin_Butsukekko
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
