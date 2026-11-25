@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c9f1d5ae9a4bd094985088dedc3c6c00
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 335514
+  packageName: Procedural UI Tool
+  packageVersion: 1.0
+  assetPath: Assets/ProceduralUITool/Editor/Scripts/Managers/PresetManagerWindow.cs
+  uploadId: 812314

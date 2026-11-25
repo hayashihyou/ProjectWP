@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3c04e74595be95c4cbed8b4c816d2167
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 335514
+  packageName: Procedural UI Tool
+  packageVersion: 1.0
+  assetPath: Assets/ProceduralUITool/Editor/ProceduralUITool.Editor.asmdef
+  uploadId: 812314

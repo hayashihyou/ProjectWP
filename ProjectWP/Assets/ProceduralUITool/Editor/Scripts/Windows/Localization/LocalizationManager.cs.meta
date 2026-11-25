@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b697d2907033b184caa279e9bc214fd1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 335514
+  packageName: Procedural UI Tool
+  packageVersion: 1.0
+  assetPath: Assets/ProceduralUITool/Editor/Scripts/Windows/Localization/LocalizationManager.cs
+  uploadId: 812314

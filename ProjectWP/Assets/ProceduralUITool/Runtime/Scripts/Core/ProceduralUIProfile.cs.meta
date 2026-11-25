@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 213acda6610d758429b48864bf2456a6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 335514
+  packageName: Procedural UI Tool
+  packageVersion: 1.0
+  assetPath: Assets/ProceduralUITool/Runtime/Scripts/Core/ProceduralUIProfile.cs
+  uploadId: 812314

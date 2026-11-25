@@ -651,6 +651,9 @@ namespace AutoRuby
 禁止|きんし
 行動|こうどう
 危ない|あぶない|v
+仕事|しごと
+辞め||v
+眠たい|ねむたい|v
 ";
 
         static readonly Dictionary<string, string> words = new Dictionary<string, string>();
