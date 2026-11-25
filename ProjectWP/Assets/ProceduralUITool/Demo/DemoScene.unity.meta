@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 97a0c8ec7ebd67c41a580930b6a46a51
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 335514
+  packageName: Procedural UI Tool
+  packageVersion: 1.0
+  assetPath: Assets/ProceduralUITool/Demo/DemoScene.unity
+  uploadId: 812314
