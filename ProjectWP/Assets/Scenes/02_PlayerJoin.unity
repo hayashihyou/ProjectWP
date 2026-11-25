@@ -14838,51 +14838,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2525470976130465616, guid: 5c600f578e4072d48b9e1d9334296f40, type: 3}
   m_PrefabInstance: {fileID: 1604402984}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1611582038
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1611582040}
-  - component: {fileID: 1611582039}
-  m_Layer: 0
-  m_Name: SpotlightTest
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1611582039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611582038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2a33592b7d49ef4e882c27765db93c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpotlightTester
-  joinSpotlight: {fileID: 1692263831}
---- !u!4 &1611582040
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611582038}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1618446952
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20331,4 +20286,3 @@ SceneRoots:
   - {fileID: 1686775188}
   - {fileID: 1522847284}
   - {fileID: 1692263827}
-  - {fileID: 1611582040}
