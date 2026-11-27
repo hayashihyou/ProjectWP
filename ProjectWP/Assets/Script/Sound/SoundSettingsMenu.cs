@@ -8,7 +8,8 @@ using UnityEngine.UI;
 /// <summary>
 /// サウンド設定画面(マスター・BGM・SE の音量)。
 ///
-/// 開き方: ボタンに SoundSettingsOpener を付けるだけ(ステージ選択画面の右上の歯車に付けてある)。
+/// 開き方: タイトル画面では歯車 →「せってい」メニュー(SettingsMenu)の「音量設定」から開く。
+///         ボタンに SoundSettingsOpener を付ければ、そのボタンから直接開くこともできる。
 ///         コードからなら SoundSettingsMenu.Open() でも開ける。
 /// 閉じ方: 「閉じる」ボタン / 画面の暗いところをクリック / Esc / パッドのBボタン
 ///

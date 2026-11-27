@@ -38,6 +38,7 @@ public class SoundSettingsOpener : MonoBehaviour
             foreach (Button button in root.GetComponentsInChildren<Button>(true))
             {
                 if (button.GetComponent<SoundSettingsOpener>() != null) { continue; }
+                if (button.GetComponent<SettingsMenuOpener>() != null) { continue; } // 「せってい」メニューを開く歯車には付けない
                 if (UsesGearSprite(button)) { button.gameObject.AddComponent<SoundSettingsOpener>(); }
             }
         }

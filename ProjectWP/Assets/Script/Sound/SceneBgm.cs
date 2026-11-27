@@ -21,6 +21,7 @@ public static class SceneBgm
         { SceneNames.PlayerJoin, "BGM_Lobby" },
         { SceneNames.StageSelect, "BGM_Lobby" },
         { SceneNames.TometeJust, "BGM_Stopwatch" },
+        { SceneNames.Butsukekko, "BGM_Butsukekko" },
         { SceneNames.MinigameResult, "BGM_Result" }, // リザルトUIはミニゲームのシーンに重ねて読み込まれる
     };
 
