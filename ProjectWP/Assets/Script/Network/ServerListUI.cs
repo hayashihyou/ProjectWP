@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -50,6 +51,16 @@ public class ServerListUI : MonoBehaviour
     [SerializeField] private Button[] serverRowButtons = new Button[3];
     [SerializeField] private TextMeshProUGUI[] serverRowLabels = new TextMeshProUGUI[3];
 
+    [Header("ほかのボタン")]
+    [Tooltip("サーバー一覧の下に置く。押すと、サーバー一覧(人数・プレイ中)を取り直す")]
+    [SerializeField] private Button refreshButton;
+
+    [Tooltip("画面の右下に置く(サーバー一覧の外)。押すと、タイトルの最初の画面に戻る。サーバー選択画面の間だけ表示する")]
+    [SerializeField] private Button backButton;
+
+    // 更新ボタンを続けて押せない秒数。Lobby への問い合わせが多すぎると断られる(429)ため
+    private const float RefreshCooldownSeconds = 2f;
+
     // Lobby上でのサーバー名。この名前で「どのサーバーか」を判定する。
     private static readonly string[] ServerNames = { "Server 1", "Server 2", "Server 3" };
 
@@ -78,6 +89,9 @@ public class ServerListUI : MonoBehaviour
             }
         }
 
+        if (refreshButton != null) refreshButton.onClick.AddListener(OnRefreshButtonClicked);
+        if (backButton != null) backButton.onClick.AddListener(OnBackButtonClicked);
+
         ShowTitlePanel();
     }
 
@@ -87,6 +101,7 @@ public class ServerListUI : MonoBehaviour
         // サーバー選択画面の背景ごと隠す(空の箱が画面端に残らないようにする)
         if (connectionPanel != null) connectionPanel.SetActive(false);
         if (serverListPanel != null) serverListPanel.SetActive(false);
+        if (backButton != null) backButton.gameObject.SetActive(false);
 
         // 「何かボタン(キーボード/マウス/ゲームパッド)を押したら次に進む」を1回だけ待つ。
         // ここで押されたデバイスを、この端末の操作デバイスとして記録しておく。
@@ -186,8 +201,14 @@ public class ServerListUI : MonoBehaviour
         if (titlePanel != null) titlePanel.SetActive(false);
         if (connectionPanel != null) connectionPanel.SetActive(true);
         if (serverListPanel != null) serverListPanel.SetActive(true);
+        if (backButton != null) backButton.gameObject.SetActive(true);
 
-        await RefreshServerListAsync();
+        // 最初の一覧を取る(取っている間はサーバーの行を、その後しばらくは更新ボタンを押せない)
+        _ = RefreshWithCooldownAsync();
+
+        // 行が押せるようになる(一覧を取り終わる)まで待つ
+        await UniTask.WaitUntil(() => this == null || serverRowButtons.Length == 0 || serverRowButtons[0] == null || serverRowButtons[0].interactable);
+        if (this == null) return;
 
         // ゲームパッド/キーボードで上下移動を始められるように、最初の行を選択状態にしておく。
         // 一度nullにしてから選び直すことで、既に同じものが選ばれていた場合でも
@@ -244,7 +265,9 @@ public class ServerListUI : MonoBehaviour
 
             if (serverRowLabels[i] != null)
             {
-                serverRowLabels[i].text = $"{ServerNames[i]}   {playerCount} / {maxPlayers}";
+                // 遊び始めている部屋は、人数の後ろに「プレイ中」と出す(押しても入れない)
+                string playing = lobby != null && NetworkBootstrap.IsLobbyPlaying(lobby) ? "   プレイ中" : "";
+                serverRowLabels[i].text = $"{ServerNames[i]}   {playerCount} / {maxPlayers}{playing}";
             }
         }
 
@@ -253,6 +276,7 @@ public class ServerListUI : MonoBehaviour
 
     private async void OnServerRowClicked(int index)
     {
+        isLeavingServerList = true; // 入ろうとしている間は、更新の待ち時間が終わってもボタンを戻さない
         SetServerRowsInteractable(false);
 
         try
@@ -261,9 +285,19 @@ public class ServerListUI : MonoBehaviour
             // 「ホストになるか参加するか」を決める直前に、必ず最新の状態を取り直す。
             await RefreshServerListAsync();
 
-            if (cachedLobbies[index] != null)
+            Lobby target = cachedLobbies[index];
+            if (target != null && NetworkBootstrap.IsLobbyPlaying(target))
             {
-                await JoinServerAsync(cachedLobbies[index].Id, ServerNames[index]);
+                // もう遊び始めている部屋には入らない(Lobbyの席も取らない)
+                NetworkBootstrap.Instance.SetStatus(PlayingMessage);
+                isLeavingServerList = false;
+                SetServerRowsInteractable(true);
+                return;
+            }
+
+            if (target != null)
+            {
+                await JoinServerAsync(target.Id, ServerNames[index]);
             }
             else
             {
@@ -272,10 +306,40 @@ public class ServerListUI : MonoBehaviour
         }
         catch (Exception e)
         {
-            NetworkBootstrap.Instance.SetStatus($"{{接続|せつぞく}}に{{失敗|しっぱい}}しました: {e.Message}");
             Debug.LogException(e);
+
+            // 途中までLobbyに入っていたら、その席を返す。
+            // (返さないと、入れていないのに人数に数えられたままになり、次の人が入れなくなる)
+            // Relayにつなぎかけていた場合の切断も、この中でまとめて行われる。
+            await NetworkBootstrap.Instance.LeaveSessionAsync();
+
+            // 失敗したあとの、最新の人数を表示し直す
+            // ※この中でステータスが「サーバーを選んでください。」に上書きされるので、失敗の文は後で出す
+            await RefreshServerListAsync();
+
+            NetworkBootstrap.Instance.SetStatus(ToFailureMessage(e));
+            isLeavingServerList = false;
             SetServerRowsInteractable(true);
         }
+    }
+
+    private const string FullMessage = "{満員|まんいん}です。ほかのサーバーを{選|えら}んでください。";
+    private const string PlayingMessage = "このサーバーはゲーム{中|ちゅう}です。ほかのサーバーを{選|えら}んでください。";
+
+    // 失敗の理由を、参加者に見せる文に直す
+    private static string ToFailureMessage(Exception e)
+    {
+        // Lobbyに断られた = ほぼ同時に押した別の人が先に届いて、席が埋まった
+        if (e is LobbyServiceException lobbyError && lobbyError.Reason == LobbyExceptionReason.LobbyFull)
+        {
+            return FullMessage;
+        }
+
+        // ホストの承認で断られた(Lobbyはすり抜けたが、ホストの時点で埋まっていた/遊び始めていた)
+        if (e.Message == Connectionapprovalhandler.RoomFullReason) return FullMessage;
+        if (e.Message == Connectionapprovalhandler.RoomPlayingReason) return PlayingMessage;
+
+        return $"{{接続|せつぞく}}に{{失敗|しっぱい}}しました: {e.Message}";
     }
 
     // ============================== ホスト側(その場でホストになる) ==============================
@@ -301,6 +365,27 @@ public class ServerListUI : MonoBehaviour
         Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(
             ServerNames[index], NetworkBootstrap.Instance.MaxPlayersPerRoom, options);
 
+        try
+        {
+            await DecideHostAndStartAsync(index, lobby);
+        }
+        catch
+        {
+            // ホストとして始める前に失敗したら、作ったLobbyを消しておく。
+            // (残すと、ホストのいない部屋が一覧に出て、他の人がそこに入ろうとして失敗してしまう)
+            // ※ホストとして始めた後なら、hostedLobbyId に登録済みなので LeaveSessionAsync が消してくれる
+            if (!Unity.Netcode.NetworkManager.Singleton.IsHost)
+            {
+                try { await LobbyService.Instance.DeleteLobbyAsync(lobby.Id); }
+                catch (Exception deleteError) { Debug.LogWarning($"[ServerListUI] 作ったLobbyを消せませんでした: {deleteError.Message}"); }
+            }
+            throw;
+        }
+    }
+
+    // 同名のLobbyが他にもできていないか調べて、自分が勝ったらホストとして始める。負けたら勝った方に参加する
+    private async Task DecideHostAndStartAsync(int index, Lobby lobby)
+    {
         // 同じタイミングで別の人も同じサーバーを選んでいた場合、同名のLobbyが2つできてしまう。
         // 全員が同じ基準(作成時刻が古い方、同時刻ならID順)で勝者を決めれば、
         // 通信の順序に関係なく必ず1つに絞れる。負けた側はホストにならず、勝者に参加する。
@@ -345,18 +430,97 @@ public class ServerListUI : MonoBehaviour
         // Lobbyに保存されている参加コードを取り出して、それでRelayに接続する
         if (lobby.Data == null || !lobby.Data.TryGetValue(RelayJoinCodeKey, out DataObject joinCodeData))
         {
-            NetworkBootstrap.Instance.SetStatus("このサーバーには{参加|さんか}コードがありません({内部|ないぶ}エラー)。");
-            return;
+            // 例外にして呼び出し元の catch に任せる(そこで Lobby の席を返してから、メッセージを出す)
+            throw new Exception("このサーバーには{参加|さんか}コードがありません({内部|ないぶ}エラー)。");
         }
 
         await NetworkBootstrap.Instance.JoinRelayAsync(joinCodeData.Value);
     }
 
+    // ============================== 一覧の下のボタン ==============================
+
+    // 「更新」: サーバー一覧を取り直す。ゲームが終わったのに「プレイ中」のまま、などを直せる
+    private async void OnRefreshButtonClicked()
+    {
+        await RefreshWithCooldownAsync();
+
+        // ゲームパッド/キーボードで続けて操作できるよう、更新ボタンを選んだままにする
+        if (this != null && EventSystem.current != null && refreshButton != null && refreshButton.interactable)
+        {
+            EventSystem.current.SetSelectedGameObject(refreshButton.gameObject);
+        }
+    }
+
+    // サーバーに入ろうとしている(またはタイトルに戻ろうとしている)最中か。
+    // この間は、更新の待ち時間が終わっても、ボタンを押せるように戻さない
+    private bool isLeavingServerList;
+
+    // 一覧を取り直す。押せなくするのは必要なものだけにする:
+    //   ・サーバーの行 … 一覧を取っている間だけ(取り終わる前に押すと、問い合わせが重なって断られるため)
+    //   ・更新ボタン … 取っている間 + その後の待ち時間(続けて押されて Lobby に断られないように。グレーになる)
+    //   ・タイトルに戻る … 通信を使わないので、押せないようにはしない
+    private async Task RefreshWithCooldownAsync()
+    {
+        if (refreshButton != null) refreshButton.interactable = false;
+        SetRowsOnlyInteractable(false);
+        try
+        {
+            await RefreshServerListAsync();
+            if (this == null) return; // 待っている間にシーンが変わった
+            if (!isLeavingServerList) SetRowsOnlyInteractable(true);
+
+            await Task.Delay(TimeSpan.FromSeconds(RefreshCooldownSeconds));
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+            if (this != null && !isLeavingServerList) SetRowsOnlyInteractable(true);
+        }
+
+        if (this == null) return;
+        if (!isLeavingServerList && refreshButton != null) refreshButton.interactable = true;
+    }
+
+    // サーバーの行だけを、押せる/押せないにする
+    private void SetRowsOnlyInteractable(bool interactable)
+    {
+        foreach (Button button in serverRowButtons)
+        {
+            if (button != null) button.interactable = interactable;
+        }
+    }
+
+    // 「もどる」: タイトルの最初の画面に戻る。
+    // ロゴの演出などを最初からやり直すため、タイトルのシーンを読み込み直す(まだどのサーバーにも入っていないので通信は関係ない)
+    private async void OnBackButtonClicked()
+    {
+        isLeavingServerList = true;
+        SetServerRowsInteractable(false);
+        SceneLoader loader = SceneLoader.Instance;
+
+        // 暗くしてから、NetworkManager(シーンをまたいで残っている)を消す。
+        // 消さずにタイトルを読み込み直すと、タイトルに置いてある NetworkManager と2つになってしまう
+        // (NetworkSceneTransition の「タイトルに戻る」と同じやり方)
+        await loader.FadeOutAsync();
+        Unity.Netcode.NetworkManager manager = Unity.Netcode.NetworkManager.Singleton;
+        if (manager != null)
+        {
+            Destroy(manager.gameObject);
+            await UniTask.WaitUntil(() => Unity.Netcode.NetworkManager.Singleton == null);
+        }
+
+        await loader.LoadSceneAsync(SceneNames.Title, useFade: false);
+        await loader.FadeInAsync();
+    }
+
+    // サーバーの行と、一覧の下のボタンを、まとめて押せる/押せないにする(通信中に押されないように)
     private void SetServerRowsInteractable(bool interactable)
     {
         foreach (Button button in serverRowButtons)
         {
             if (button != null) button.interactable = interactable;
         }
+        if (refreshButton != null) refreshButton.interactable = interactable;
+        if (backButton != null) backButton.interactable = interactable;
     }
 }

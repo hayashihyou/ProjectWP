@@ -40,6 +40,21 @@ public class ButsukekkoMinigame : MinigameBase
         }
     }
 
+    // 誰かが途中で抜けたとき : その人が持っていたボールを最初の位置に戻す
+    // (持ち主のキャラクターが消えて、ボールが空中に止まったままにならないように)。点数はそのまま結果に残る
+    protected override void OnServerPlayerLeft(int slot)
+    {
+        if (balls.Length == 0) { FindBalls(); }
+
+        foreach (ButsukekkoBall ball in balls)
+        {
+            if (ball != null && ball.State == ButsukekkoBall.BallState.Held && ball.HolderSlot == slot)
+            {
+                ball.ServerResetBall();
+            }
+        }
+    }
+
     // ボタンが押されたとき : その人がボールを持っていれば投げる
     protected override void OnServerPlayerAction(int slot, string actionName, MinigameValue value, double pressedServerTime)
     {

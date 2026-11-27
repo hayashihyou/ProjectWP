@@ -263,8 +263,14 @@ public static class MinigameInfo
     /// <summary>誰かが脱落した(枠番号)。TODO(ステップ12)</summary>
     public static event Action<int> OnPlayerEliminated;
 
-    /// <summary>誰かが途中で抜けた(枠番号)。TODO(ステップ12)</summary>
+    /// <summary>
+    /// 誰かが途中で抜けた(枠番号)。画面下の「〇Pが抜けました」は自動で出る(PlayerSlot)ので、ここでは各UIの表示を変える。
+    /// 抜けた人の値はそのまま結果に残る(GetPlayer の IsConnected が false になる)
+    /// </summary>
     public static event Action<int> OnPlayerLeft;
+
+    /// <summary>抜けた人の枠を CPU が引き継いだ(枠番号)。GetPlayer の IsCpu が true になる</summary>
+    public static event Action<int> OnPlayerReplacedByCpu;
 
     /// <summary>ゲームが終わって結果が届いた(結果。順位の良い順)</summary>
     public static event Action<IReadOnlyList<MinigameRankEntry>> OnGameFinished;
@@ -303,6 +309,7 @@ public static class MinigameInfo
         OnPlayerFinished = null;
         OnPlayerEliminated = null;
         OnPlayerLeft = null;
+        OnPlayerReplacedByCpu = null;
         OnGameFinished = null;
         OnCustomEvent = null;
         OnNextChosen = null;
@@ -324,6 +331,7 @@ public static class MinigameInfo
     internal static void RaisePlayerFinished(int slot) => OnPlayerFinished?.Invoke(slot);
     internal static void RaisePlayerEliminated(int slot) => OnPlayerEliminated?.Invoke(slot);
     internal static void RaisePlayerLeft(int slot) => OnPlayerLeft?.Invoke(slot);
+    internal static void RaisePlayerReplacedByCpu(int slot) => OnPlayerReplacedByCpu?.Invoke(slot);
     internal static void RaiseCustomEvent(string eventName, MinigameValue value, int slot) => OnCustomEvent?.Invoke(eventName, value, slot);
     internal static void RaiseNextChosen(MinigameNextAction action) => OnNextChosen?.Invoke(action);
     internal static void RaisePlayerReady(int slot) => OnPlayerReady?.Invoke(slot);

@@ -19,6 +19,11 @@ public class TometeJustMinigame : MinigameBase
     [Tooltip("目標の秒数の刻み。0.5 なら 7.5, 8.0, 8.5 … のどれかになる")]
     [SerializeField] private float targetStepSeconds = 0.5f;
 
+    [Header("途中で抜けた人")]
+    [Tooltip("途中で抜けた人の誤差(秒)。抜けたラウンドから最後のラウンドまで、毎ラウンドこの誤差になる。" +
+             "時間切れのときの誤差(制限時間 - 目標)より大きくすると、必ず最下位になる")]
+    [SerializeField] private float leaverErrorSeconds = 30f;
+
     [Header("演出の時間")]
     [Tooltip("カメラが定点に戻ってから、計測を始めるまでの間(秒)。「スタート！」の余韻。" +
              "このゲームでは Intro Seconds・Round Intro Seconds は使わず、カメラの演出の長さから待つ時間を決める")]
@@ -136,6 +141,14 @@ public class TometeJustMinigame : MinigameBase
         for (int i = 0; i < PlayerCount; i++)
         {
             MinigamePlayerState player = GetPlayer(i);
+
+            // 途中で抜けた人は、止めていても誤差を「抜けた人の誤差」にする(このラウンドから最後まで)
+            if (!player.IsConnected)
+            {
+                ServerSetValue(player.SlotIndex, leaverErrorSeconds);
+                continue;
+            }
+
             if (player.IsFinished) { continue; }
 
             float error = Mathf.Abs(elapsed - targetSeconds);
