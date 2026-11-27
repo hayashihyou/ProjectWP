@@ -654,6 +654,8 @@ namespace AutoRuby
 仕事|しごと
 辞め||v
 眠たい|ねむたい|v
+音量|おんりょう
+終了|しゅうりょう
 ";
 
         static readonly Dictionary<string, string> words = new Dictionary<string, string>();
