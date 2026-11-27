@@ -10,8 +10,9 @@ using UnityEngine;
 ///
 /// 状態: Idle(床にあって拾える) / Held(誰かが持っている) / Flying(投げられて飛んでいる)
 ///
-/// 当たり判定は物理の衝突ではなく「プレイヤーの足元からの距離」で行う。
+/// 拾う判定は物理の衝突ではなく「プレイヤーの足元からの距離」で行う。
 /// (ホストの画面では、ほかのプレイヤーのコライダーが無効になっているため)
+/// 当たり判定と当たったときの処理は ButsukekkoHitManager にまとめてある。
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class ButsukekkoBall : NetworkBehaviour
@@ -35,13 +36,10 @@ public class ButsukekkoBall : NetworkBehaviour
     [Tooltip("上方向の速さ")]
     [SerializeField] private float throwUpSpeed = 2f;
 
-    [Header("当たる")]
-    [Tooltip("体の中心からこの距離(横方向)にボールが入ったら当たり")]
-    [SerializeField] private float hitRadius = 0.5f;
-
-    [Tooltip("足元からこの高さまでを体とみなす(拾う判定にも使う)")]
+    [Tooltip("足元からこの高さまでを体とみなす(拾う判定に使う。当たり判定は ButsukekkoHitManager)")]
     [SerializeField] private float bodyHeight = 1.4f;
 
+    [Header("当たる")]
     [Tooltip("当たった後、ボールが跳ね返る速さ")]
     [SerializeField] private float hitBounceSpeed = 2f;
 
@@ -71,6 +69,7 @@ public class ButsukekkoBall : NetworkBehaviour
 
     // ここから下はサーバーだけが使う
     private ButsukekkoMinigame minigame;
+    private ButsukekkoHitManager hitManager;
     private int throwerSlot = -1;
     private bool isReleasing;
     private float releaseTimer;
@@ -112,6 +111,7 @@ public class ButsukekkoBall : NetworkBehaviour
         }
 
         minigame = FindFirstObjectByType<ButsukekkoMinigame>();
+        hitManager = FindFirstObjectByType<ButsukekkoHitManager>();
     }
 
     public override void OnNetworkDespawn()
@@ -307,42 +307,37 @@ public class ButsukekkoBall : NetworkBehaviour
         rb.isKinematic = false;
     }
 
+    // 誰かに当たったか、当たり判定の係(ButsukekkoHitManager)に聞く
     private void ServerCheckHit()
     {
-        Vector3 ballPosition = transform.position;
+        if (hitManager == null) { return; }
 
-        foreach (PlayerSlot player in players)
+        if (hitManager.ServerFindHit(transform.position, throwerSlot, out int hitSlot))
         {
-            if (player == null) { continue; }
-            int slot = player.SlotIndex;
-            if (slot < 0 || slot == throwerSlot) { continue; }
-
-            if (IsInsideBody(player.transform.position, ballPosition, hitRadius))
-            {
-                ServerHit(slot, player.transform.position);
-                return;
-            }
+            ServerHit(hitSlot);
         }
     }
 
-    private void ServerHit(int hitSlot, Vector3 hitPlayerPosition)
+    private void ServerHit(int hitSlot)
     {
         int thrower = throwerSlot;
+        Vector3 hitPoint = transform.position;
+        Vector3 ballDirection = rb.linearVelocity; // 跳ね返す前の向き(エフェクトの向きに使う)
+
         throwerSlot = -1;
         cooldownTimer = pickupCooldown;
         state.Value = BallState.Idle;
 
         // 当たった人から離れる方向に、軽く跳ね返す
-        Vector3 away = transform.position - hitPlayerPosition;
+        PlayerSlot hitPlayer = FindPlayer(hitSlot);
+        Vector3 away = hitPlayer != null ? hitPoint - hitPlayer.transform.position : -ballDirection;
         away.y = 0f;
-        if (away.sqrMagnitude < 0.001f) { away = -rb.linearVelocity; away.y = 0f; }
+        if (away.sqrMagnitude < 0.001f) { away = -ballDirection; away.y = 0f; }
         away.Normalize();
         rb.linearVelocity = away * hitBounceSpeed + Vector3.up * hitBounceSpeed;
 
-        if (minigame != null)
-        {
-            minigame.ServerReportHit(thrower, hitSlot);
-        }
+        // 無敵・点数・エフェクト・音・点滅は、当たり判定の係がまとめてやる
+        hitManager.OnServerHit(thrower, hitSlot, hitPoint, ballDirection);
     }
 
 
