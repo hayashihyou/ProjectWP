@@ -102,6 +102,65 @@ public class ServerListUI : MonoBehaviour
             return;
         }
 
+        // 設定画面が開いている間のキー/クリックは設定画面の操作なので、「はじめる」には進まない
+        if (IsAnySettingsOpen)
+        {
+            InputSystem.onAnyButtonPress.CallOnce(OnAnyButtonPressedOnTitle);
+            return;
+        }
+
+        // マウス/タッチで押されたときは、右上の歯車を押しただけかもしれないので、1フレーム待ってから調べる。
+        // (この通知が来た瞬間は、押した位置がまだ反映されていないことがあるため。特にタッチ)
+        if (control.device is Pointer pointer)
+        {
+            ProceedIfNotOnGearButton(control, pointer);
+            return;
+        }
+
+        ProceedFromTitle(control);
+    }
+
+    // 1フレーム待って押した位置が反映されてから、歯車の上でなければ「はじめる」に進む。
+    // ※このスクリプトはタイトル中は非表示の ConnectionPanel に付いているので、
+    //   コルーチン(StartCoroutine)は使えない。代わりに await Task.Yield() で1フレーム待つ
+    private async void ProceedIfNotOnGearButton(InputControl control, Pointer pointer)
+    {
+        await Task.Yield();
+        if (this == null) { return; } // 待っている間にシーンが切り替わったら何もしない
+
+        if (IsAnySettingsOpen || IsOverGearButton(pointer.position.ReadValue()))
+        {
+            // 歯車を押しただけなので進まず、もう一度「何かボタン」を待ち直す
+            InputSystem.onAnyButtonPress.CallOnce(OnAnyButtonPressedOnTitle);
+            return;
+        }
+
+        ProceedFromTitle(control);
+    }
+
+    // 「せってい」メニューか音量設定の画面が開いているか
+    private static bool IsAnySettingsOpen => SettingsMenu.IsOpen || SoundSettingsMenu.IsOpen;
+
+    // 画面上のこの位置に歯車ボタン(SettingsMenuOpener / SoundSettingsOpener 付きのボタン)があるかどうか
+    private static bool IsOverGearButton(Vector2 screenPosition)
+    {
+        if (EventSystem.current == null) { return false; }
+
+        var eventData = new PointerEventData(EventSystem.current) { position = screenPosition };
+        var hits = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, hits);
+        foreach (RaycastResult hit in hits)
+        {
+            // ※スタートボタンなど他のUIはこれまでどおり「はじめる」に進ませたいので、歯車だけを見る
+            if (hit.gameObject.GetComponentInParent<SettingsMenuOpener>() != null) { return true; }
+            if (hit.gameObject.GetComponentInParent<SoundSettingsOpener>() != null) { return true; }
+        }
+        return false;
+    }
+
+    // タイトルから「はじめる」に進む(押したデバイスの記録 → 決定音 → 「はじめる」を消す)
+    private void ProceedFromTitle(InputControl control)
+    {
         if (LocalInputDeviceService.Instance != null)
         {
             LocalInputDeviceService.Instance.SetChosenDevice(control.device);
