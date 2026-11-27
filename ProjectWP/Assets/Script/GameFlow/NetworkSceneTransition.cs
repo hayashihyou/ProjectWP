@@ -307,6 +307,15 @@ public class NetworkSceneTransition : MonoBehaviour
         }
 
         isTransitioning = true;
+
+        // 待機所から先へ進んだら「遊び始めた」として、新しい人の参加を締め切る。
+        // (待機所に戻るときは、また参加できるようにする)
+        // 暗くし始める前に締め切って、遷移中に入ってきた人が途中から混ざらないようにする
+        if (NetworkBootstrap.Instance != null)
+        {
+            NetworkBootstrap.Instance.SetRoomPlaying(sceneName != SceneNames.PlayerJoin);
+        }
+
         SceneLoader loader = SceneLoader.Instance;
         CancellationToken ct = transitionCts.Token;
 

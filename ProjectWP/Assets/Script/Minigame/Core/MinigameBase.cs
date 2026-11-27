@@ -78,6 +78,11 @@ public abstract class MinigameBase : NetworkBehaviour
     [Tooltip("オン = このラウンドを終えた人(ServerSetFinished された人)の行動は受け付けない。1ラウンドに1回だけ押すゲーム向け(例: ストップウォッチ)。何度でも押すゲームで ServerSetFinished を使わないなら、オンのままでも影響はない")]
     [SerializeField] private bool ignoreActionsAfterFinished = true;
 
+    [Header("途中で抜けた人")]
+    [Tooltip("オン = 抜けた人の枠を CPU が引き継ぐ。ラウンド制なら次のラウンドから、1ラウンドのゲームはすぐに引き継ぐ。" +
+             "CPU の動きは各ミニゲームが書く(OnServerCpuTakeOver で始める)。オフ = 抜けた時点の値のまま結果に残る")]
+    [SerializeField] private bool cpuTakesOverLeavers = false;
+
     [Header("結果")]
     [Tooltip("値が大きいほど勝ちか、小さいほど勝ちか。まとめ方が RankPoints のときは、各ラウンドの順位を決めるのに使う")]
     [SerializeField] private MinigameWinOrder winOrder = MinigameWinOrder.HigherIsBetter;
@@ -166,6 +171,15 @@ public abstract class MinigameBase : NetworkBehaviour
     // 通信が止まったとき(OnNetworkDespawn)に止める。オブジェクトが消えるのを待つと、その間に合図(RPC)を送ろうとしてエラーになるため
     private CancellationTokenSource gameCts;
 
+    // 進行役をもう始めたか(サーバーだけが使う)。「準備できた」と「誰かが抜けた」が重なっても、2回始めないようにする
+    private bool gameStarted;
+
+    // 次のラウンドの始めに CPU が引き継ぐ枠番号(サーバーだけが使う)
+    private readonly HashSet<int> pendingCpuSlots = new HashSet<int>();
+
+    // 切断の知らせを受け取るために登録した NetworkManager(サーバーだけが使う)。外すときに使う
+    private NetworkManager disconnectSource;
+
 
 
     // 準備ができたことをつたえる
@@ -177,9 +191,10 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
     // 全員の準備できたがそろったか調べる(サーバーで呼ばれる)。揃ったらカウントダウンへ進む。
-    private void ServerCheckAllReady()
+    // leavingClientId : 今まさに抜けている端末のID(切断の知らせの中では、まだ接続中の一覧に残っていることがあるので、数えないようにする)
+    private void ServerCheckAllReady(ulong? leavingClientId = null)
     {
-        if(Phase != MinigamePhase.WaitingForPlayers)
+        if (gameStarted || Phase != MinigamePhase.WaitingForPlayers)
         {
             return;
         }
@@ -187,13 +202,108 @@ public abstract class MinigameBase : NetworkBehaviour
         // 接続中の全員を一人ずつ調べる
         foreach(ulong clientId in NetworkManager.ConnectedClientsIds)
         {
+            if (clientId == leavingClientId) { continue; }
             if (!readyClientIds.Contains(clientId))
             {
                 return;
             }
         }
         Debug.Log("全員揃いました");
+        gameStarted = true;
         ServerRunGameAsync().Forget();
+    }
+
+
+    // ---------- 途中で抜けた人(サーバーで切断を受け取り、全員に知らせる) ----------
+
+    // 誰かの端末が切断したとき(サーバーで、NetworkManager が自動で呼ぶ)
+    private void ServerOnClientDisconnected(ulong clientId)
+    {
+        // ホスト自身が止まったときは、全員がタイトルに戻るので何もしない
+        if (clientId == NetworkManager.ServerClientId) { return; }
+
+        // まだ始まっていなければ、抜けた人を待たずに始められるか調べ直す
+        readyClientIds.Remove(clientId);
+        ServerCheckAllReady(clientId);
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            MinigamePlayerState state = players[i];
+            if (state.ClientId != clientId || state.IsCpu || !state.IsConnected) { continue; }
+
+            // 値・終えたかはそのまま残す(抜けた時点の値で結果に載る)
+            state.IsConnected = false;
+            players[i] = state;
+
+            Debug.Log($"[MinigameBase] {state.SlotIndex + 1}P が抜けました");
+            PlayerLeftRpc(state.SlotIndex);
+            OnServerPlayerLeft(state.SlotIndex);
+
+            if (cpuTakesOverLeavers)
+            {
+                ServerScheduleCpuTakeOver(state.SlotIndex);
+            }
+        }
+    }
+
+    // CPU に引き継ぐ予約をする(サーバーで呼ばれる)。
+    // ラウンド制なら次のラウンドの始めに、1ラウンドのゲームはすぐに引き継ぐ
+    private void ServerScheduleCpuTakeOver(int slot)
+    {
+        bool tooLate = Phase == MinigamePhase.GameEnd || Phase == MinigamePhase.Result;
+        if (tooLate) { return; } // もう終わっているゲームは引き継がない
+
+        if (totalRounds <= 1)
+        {
+            ServerTakeOverByCpu(slot);
+        }
+        else
+        {
+            pendingCpuSlots.Add(slot);
+        }
+    }
+
+    // 予約しておいた枠を CPU に引き継ぐ(サーバーで、各ラウンドの始めに呼ばれる)
+    private void ServerApplyPendingCpuTakeOvers()
+    {
+        foreach (int slot in pendingCpuSlots)
+        {
+            ServerTakeOverByCpu(slot);
+        }
+        pendingCpuSlots.Clear();
+    }
+
+    // その枠を CPU が操作する状態にする(サーバーで呼ばれる)。値は引き継ぐ
+    private void ServerTakeOverByCpu(int slot)
+    {
+        int index = FindPlayerIndex(slot);
+        if (index < 0) { return; }
+
+        MinigamePlayerState state = players[index];
+        state.IsCpu = true;
+        state.IsConnected = true; // CPU は「参加中」として、終了条件などの人数に数える
+        state.IsReady = true;
+        players[index] = state;
+
+        Debug.Log($"[MinigameBase] {slot + 1}P を CPU が引き継ぎました");
+        PlayerReplacedByCpuRpc(slot);
+        OnServerCpuTakeOver(slot);
+    }
+
+    // 誰かが抜けたことを全員に知らせる(全員の端末で実行)。
+    // 画面下の「〇Pが抜けました」は、どのシーンでも出るように PlayerSlot が出す(ここで出すと2回になる)
+    [Rpc(SendTo.Everyone)]
+    private void PlayerLeftRpc(int slot)
+    {
+        MinigameInfo.RaisePlayerLeft(slot);
+    }
+
+    // 抜けた人の枠を CPU が引き継いだことを全員に知らせる(全員の端末で実行)
+    [Rpc(SendTo.Everyone)]
+    private void PlayerReplacedByCpuRpc(int slot)
+    {
+        Announcement.Show($"{slot + 1}PはCPUが{{操作|そうさ}}します");
+        MinigameInfo.RaisePlayerReplacedByCpu(slot);
     }
 
 
@@ -333,6 +443,9 @@ public abstract class MinigameBase : NetworkBehaviour
 
         for (int round = 1; round <= totalRounds; round++)
         {
+            // 前のラウンドまでに抜けた人の枠を、このラウンドから CPU が引き継ぐ(設定がオンのとき)
+            ServerApplyPendingCpuTakeOvers();
+
             currentRound.Value = round;
             ServerResetRoundValues();
 
@@ -485,6 +598,7 @@ public abstract class MinigameBase : NetworkBehaviour
     {
         players.Clear();
         roundValueHistory.Clear();
+        pendingCpuSlots.Clear();
 
         List<PlayerSlot> slots = new List<PlayerSlot>(FindObjectsByType<PlayerSlot>(FindObjectsSortMode.None));
         slots.Sort((a, b) => a.SlotIndex.CompareTo(b.SlotIndex));
@@ -590,7 +704,7 @@ public abstract class MinigameBase : NetworkBehaviour
                     state.TotalValue = history[history.Count - 1];
                     break;
                 case MinigameRoundAggregation.RankPoints:
-                    // 抜けた人など、このラウンドの順位がない人は0点
+                    // 勝ち点の表にない順位(表より人数が多いとき)は0点
                     if (roundRanks.TryGetValue(state.SlotIndex, out int rank) && rank - 1 < rankPoints.Length)
                     {
                         state.TotalValue += rankPoints[rank - 1];
@@ -615,7 +729,7 @@ public abstract class MinigameBase : NetworkBehaviour
 
     /// <summary>
     /// 最終的な順位を計算する(サーバーで、ゲームの最後に1回呼ばれる)。
-    /// 標準では、接続中の人を「合計の値」と勝ち方の設定で並べる(同じ値は同じ順位)。
+    /// 標準では、全員(途中で抜けた人も含む)を「合計の値」と勝ち方の設定で並べる(同じ値は同じ順位)。
     /// 「脱落した順」など、値から順位が決まらないミニゲームは、これを override して独自に決める
     /// </summary>
     protected virtual List<MinigameRankEntry> CalculateRanking()
@@ -628,8 +742,8 @@ public abstract class MinigameBase : NetworkBehaviour
     }
 
     /// <summary>
-    /// 接続中の人を値で並べて順位を付ける(同じ値は同じ順位。例: 1位, 1位, 3位)。
-    /// CalculateRanking を override するときにも使える
+    /// 全員を値で並べて順位を付ける(同じ値は同じ順位。例: 1位, 1位, 3位)。
+    /// 途中で抜けた人も、抜けた時点の値で並べる。CalculateRanking を override するときにも使える
     /// </summary>
     /// <param name="useRoundValue">true = 今回のラウンドの値、false = 合計の値で比べる</param>
     /// <param name="higherIsBetter">true = 大きいほど上の順位</param>
@@ -639,7 +753,6 @@ public abstract class MinigameBase : NetworkBehaviour
         for (int i = 0; i < players.Count; i++)
         {
             MinigamePlayerState player = players[i];
-            if (!player.IsConnected) { continue; } // 途中で抜けた人は結果から外す
 
             entries.Add(new MinigameRankEntry
             {
@@ -1129,6 +1242,18 @@ public abstract class MinigameBase : NetworkBehaviour
     /// </summary>
     protected virtual void OnServerPlayerAction(int slot, string actionName, MinigameValue value, double pressedServerTime) { }
 
+    /// <summary>
+    /// 誰かが途中で抜けたときに呼ばれる(サーバーのみ)。基盤が IsConnected を false にした後に呼ばれる。
+    /// その人が持っていた物を戻すなど、ミニゲーム独自の後始末を書く。値は抜けた時点のまま結果に残る
+    /// </summary>
+    protected virtual void OnServerPlayerLeft(int slot) { }
+
+    /// <summary>
+    /// 抜けた人の枠を CPU が引き継いだときに呼ばれる(サーバーのみ。設定「CPU が引き継ぐ」がオンのときだけ)。
+    /// ここから、その枠の CPU を動かし始める(IsCpu が true になっている)
+    /// </summary>
+    protected virtual void OnServerCpuTakeOver(int slot) { }
+
     // ---------- ミニゲーム担当者が書く場所(演出で待つ。すべて任意) ----------
     // 何も書かなければ、インスペクターの「演出」の秒数だけ待つ。
     // 秒数で決まらない演出(カメラが動き終わるまで など)は override して、終わるまで await する。
@@ -1163,6 +1288,13 @@ public abstract class MinigameBase : NetworkBehaviour
         // UI 用の窓口(MinigameInfo)に、今動いているミニゲームとして登録する
         MinigameInfo.Register(this);
 
+        // サーバーは、誰かが途中で抜けたことを受け取れるようにしておく
+        if (IsServer)
+        {
+            disconnectSource = NetworkManager;
+            disconnectSource.OnClientDisconnectCallback += ServerOnClientDisconnected;
+        }
+
         NotifyReadyRpc();
     }
     // ネットワークから消えるとき、全員の端末で呼ばれる。進行役を止め、窓口から外す(イベントの登録も片付けられる)
@@ -1174,6 +1306,12 @@ public abstract class MinigameBase : NetworkBehaviour
             gameCts.Cancel();
             gameCts.Dispose();
             gameCts = null;
+        }
+
+        if (disconnectSource != null)
+        {
+            disconnectSource.OnClientDisconnectCallback -= ServerOnClientDisconnected;
+            disconnectSource = null;
         }
 
         MinigameInfo.Unregister(this);

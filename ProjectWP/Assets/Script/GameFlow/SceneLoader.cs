@@ -285,6 +285,12 @@ public class SceneLoader : MonoBehaviour
     // 今のフェードの濃さ(0=見えている、1=真っ暗)。フェード用のCanvasGroupが無ければ0扱い。
     private float CurrentFadeAlpha => _fadeCanvasGroup != null ? _fadeCanvasGroup.alpha : 0f;
 
+    /// <summary>
+    /// 画面が暗くなっている(暗くなり始めている)か。ローディング中もここが true になる。
+    /// アナウンスなど「明るくなってから見せたいもの」が、出すのを待つのに使う
+    /// </summary>
+    public bool IsScreenCovered => CurrentFadeAlpha > 0.01f;
+
     private async UniTask FadeAsync(float from, float to, float duration, CancellationToken ct)
     {
         if (_fadeCanvasGroup == null)

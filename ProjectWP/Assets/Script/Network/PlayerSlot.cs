@@ -83,10 +83,12 @@ public class PlayerSlot : NetworkBehaviour
     {
         slotIndex.OnValueChanged -= OnSlotIndexChanged;
 
-        // 誰かが抜けたら退出音(自分が切断したときは全員分が一斉に消えるので鳴らさない)
+        // 誰かが抜けたら退出音と、画面下のアナウンス(どのシーンでも出る)。
+        // 自分が切断したときは全員分が一斉に消えるので、どちらも出さない
         if (slotIndex.Value >= 0 && NetworkManager != null && !NetworkManager.ShutdownInProgress)
         {
             SoundManager.Instance.PlaySe(LeaveSoundId);
+            Announcement.Show($"{slotIndex.Value + 1}Pが{{抜|ぬ}}けました");
         }
 
         if (!IsServer) return;
@@ -141,7 +143,7 @@ public class PlayerSlot : NetworkBehaviour
         else
         {
             // 4人分の枠が全部埋まっている(想定外の人数)場合。
-            // ConnectionapprovalhandlerでmaxTotalPlayersを4に制限しているので、
+            // Connectionapprovalhandlerで人数を NetworkBootstrap.MaxPlayersPerRoom(4人)に制限しているので、
             // 通常は起きないはずだが、念のためログだけ残す。
             Debug.LogWarning("[PlayerSlot] No free slot available.");
         }

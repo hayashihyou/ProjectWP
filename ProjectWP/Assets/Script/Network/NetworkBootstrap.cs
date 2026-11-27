@@ -259,6 +259,11 @@ public class NetworkBootstrap : MonoBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += OnConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnected;
 
+        // 接続するときに、自分のLobbyでのプレイヤーIDをホストに渡しておく。
+        // (アプリが落ちるなどして自分でLobbyから抜けられなかったとき、ホストが代わりに外せるように)
+        NetworkManager.Singleton.NetworkConfig.ConnectionData =
+            System.Text.Encoding.UTF8.GetBytes(AuthenticationService.Instance.PlayerId);
+
         try
         {
             // Netcodeのクライアントとして接続を開始する
@@ -322,6 +327,89 @@ public class NetworkBootstrap : MonoBehaviour
     public void RegisterJoinedLobby(string lobbyId)
     {
         joinedLobbyId = lobbyId;
+    }
+
+    // ============================== 部屋の状態(ホスト側) ==============================
+
+    // Lobbyのデータに「遊び始めたかどうか」を書くときのキー名と値
+    private const string RoomStateKey = "roomState";
+    private const string RoomStatePlaying = "playing";
+    private const string RoomStateWaiting = "waiting";
+
+    /// <summary>
+    /// 遊び始めたかどうか(ホスト側)。true の間は、新しい人の参加を断る。
+    /// </summary>
+    public bool IsRoomPlaying { get; private set; }
+
+    /// <summary>
+    /// サーバー一覧で見たLobbyが、もう遊び始めているかどうか。
+    /// </summary>
+    public static bool IsLobbyPlaying(Unity.Services.Lobbies.Models.Lobby lobby)
+    {
+        return lobby.Data != null
+            && lobby.Data.TryGetValue(RoomStateKey, out var state)
+            && state.Value == RoomStatePlaying;
+    }
+
+    /// <summary>
+    /// 遊び始めた/待機所に戻ったことを、Lobbyにも書いて一覧から分かるようにする(ホストだけ)。
+    /// NetworkSceneTransition がシーンを移るときに呼ぶ。
+    /// </summary>
+    public async void SetRoomPlaying(bool playing)
+    {
+        if (IsRoomPlaying == playing) return;
+        IsRoomPlaying = playing;
+
+        // ホストとしてLobbyを作っていない(ミニゲームのシーンから直接始めた等)なら、Lobbyには書かない
+        if (hostedLobbyId == null) return;
+
+        var options = new Unity.Services.Lobbies.UpdateLobbyOptions
+        {
+            // Public = Lobbyに入っていない人(サーバー一覧を見ている人)にも見える
+            // ※指定したキーだけが書き換わる(参加コードなど、他のデータは消えない)
+            Data = new System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.Models.DataObject>
+            {
+                {
+                    RoomStateKey,
+                    new Unity.Services.Lobbies.Models.DataObject(
+                        Unity.Services.Lobbies.Models.DataObject.VisibilityOptions.Public,
+                        playing ? RoomStatePlaying : RoomStateWaiting)
+                }
+            }
+        };
+
+        try
+        {
+            await Unity.Services.Lobbies.LobbyService.Instance.UpdateLobbyAsync(hostedLobbyId, options);
+        }
+        catch (Exception e)
+        {
+            // 書けなくても、ホストの承認で断るので進行は止めない(ログだけ残す)
+            Debug.LogWarning($"[NetworkBootstrap] Lobbyに部屋の状態を書けませんでした: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 切断された参加者を、ホストが作ったLobbyから外す(ホストだけ)。
+    /// 参加者が自分で抜けられなかったとき(アプリが落ちた、回線が切れた等)に、席が残らないようにする。
+    /// </summary>
+    public async void RemovePlayerFromHostedLobby(string lobbyPlayerId)
+    {
+        if (hostedLobbyId == null || string.IsNullOrEmpty(lobbyPlayerId)) return;
+
+        try
+        {
+            await Unity.Services.Lobbies.LobbyService.Instance.RemovePlayerAsync(hostedLobbyId, lobbyPlayerId);
+        }
+        catch (Unity.Services.Lobbies.LobbyServiceException e)
+            when (e.Reason == Unity.Services.Lobbies.LobbyExceptionReason.PlayerNotFound)
+        {
+            // 本人が先に自分で抜けていた(普通に「タイトルに戻る」で抜けたとき)。何もしなくてよい
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[NetworkBootstrap] 切断した人をLobbyから外せませんでした: {e.Message}");
+        }
     }
 
     // ============================== 抜ける ==============================
