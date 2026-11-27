@@ -85,7 +85,7 @@ public class PlayerBallAnimation : MonoBehaviour
     // サーバーからの出来事。自分のキャラクターが投げ始めたら、投げるアニメーションを再生する
     private void HandleCustomEvent(string eventName, MinigameValue value, int slot)
     {
-        if (eventName != ButsukekkoMinigame.HitEventName) return;
+        if (eventName != ButsukekkoMinigame.ThrowEventName) return;
         if (playerSlot == null || slot != playerSlot.SlotIndex) return;
         if (animator == null) return;
 

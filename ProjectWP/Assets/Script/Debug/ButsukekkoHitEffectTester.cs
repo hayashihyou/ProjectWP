@@ -31,7 +31,7 @@ public class ButsukekkoHitEffectTester : MonoBehaviour
     [SerializeField] private Color[] playerColors =
     {
         new Color(1f, 0.45f, 0.7f),   // 1P: ピンク
-        new Color(0.75f, 0.6f, 1f),   // 2P: 明るい紫
+        new Color(0.65f, 0.45f, 1f),  // 2P: 紫(キャラの色より少し濃くして、エフェクトで薄く見えないようにする)
         new Color(0.4f, 0.9f, 1f),    // 3P: 水色
         new Color(0.6f, 1f, 0.2f),    // 4P: 黄緑
     };

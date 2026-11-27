@@ -75,7 +75,7 @@ public class ButsukekkoMinigame : MinigameBase
     }
 
     /// <summary>
-    /// ボールが当たったことを知らせる(サーバーでだけ有効)。ButsukekkoBall から呼ばれる。
+    /// ボールが当たったことを知らせる(サーバーでだけ有効)。ButsukekkoHitManager から呼ばれる。
     /// プレイ中以外、自分に当たった場合、枠番号が不正な場合は何もしない
     /// </summary>
     public void ServerReportHit(int throwerSlot, int hitSlot)

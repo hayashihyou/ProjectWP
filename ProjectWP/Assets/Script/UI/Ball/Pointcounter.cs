@@ -10,11 +10,15 @@ using UnityEditor;
 /// <summary>
 /// 上矢印キーで数字が+1され、文字だけがアニメーションする仮スクリプト。
 /// TextMeshPro(UI) の Text にアタッチして使います。
+/// ゲームから点数を出すときは SetCount(点数) を呼びます(ButsukekkoScoreUI など)。
 /// </summary>
 [RequireComponent(typeof(TextMeshProUGUI))]
 public class PointCounter : MonoBehaviour
 {
     [HideInInspector] public int count = 0;
+
+    // 上矢印キーで +1 する確認用の機能。本番のミニゲームでは切っておく
+    [HideInInspector] public bool useUpArrowTest = true;
 
     // ---- 跳ねるアニメーション ----
     [HideInInspector] public bool useBounce = true;
@@ -45,12 +49,9 @@ public class PointCounter : MonoBehaviour
 
     void Update()
     {
-        if (UpArrowPressed())
+        if (useUpArrowTest && UpArrowPressed())
         {
-            count++;
-            UpdateText();
-            if (useBounce) _bounceTimer = 0f;
-            if (useScale) _scaleTimer = 0f;
+            SetCount(count + 1);
         }
 
         // 両方チェック時も、それぞれ独立して同時に再生される
@@ -76,6 +77,17 @@ public class PointCounter : MonoBehaviour
 
         _rect.anchoredPosition = pos;
         _rect.localScale = scale;
+    }
+
+    /// <summary>数字を変える。前と違う数字なら、跳ねる・拡大のアニメーションも再生する</summary>
+    public void SetCount(int value)
+    {
+        bool changed = value != count;
+        count = value;
+        if (_text != null) UpdateText();
+        if (!changed) return;
+        if (useBounce) _bounceTimer = 0f;
+        if (useScale) _scaleTimer = 0f;
     }
 
     bool UpArrowPressed()
@@ -104,6 +116,7 @@ public class PointCounterEditor : Editor
         EditorGUI.BeginChangeCheck();
 
         EditorGUILayout.LabelField("現在の数字", c.count.ToString());
+        c.useUpArrowTest = EditorGUILayout.ToggleLeft("上矢印キーで +1 (確認用)", c.useUpArrowTest);
         EditorGUILayout.Space();
 
         c.useBounce = EditorGUILayout.ToggleLeft("跳ねるアニメーション", c.useBounce);
