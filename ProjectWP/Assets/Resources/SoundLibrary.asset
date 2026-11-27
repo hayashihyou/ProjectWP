@@ -265,3 +265,45 @@ MonoBehaviour:
     randomizePitch: 0
     randomPitchRange: 0
     minInterval: 0.05
+  - id: BGM_Butsukekko
+    clip: {fileID: 8300000, guid: e740ffd6b5ead1f49922a568534ad656, type: 3}
+    category: 0
+    sceneLabel: "\u307F\u3093\u306A\u3067\u3076\u3064\u3051\u3063\u3053"
+    usageLabel: "対戦中"
+    volume: 0.15
+    pitch: 1
+    loop: 1
+    loopFadeSeconds: 0
+    fadeInSeconds: 0.5
+    fadeOutSeconds: 0.5
+    randomizePitch: 0
+    randomPitchRange: 0.05
+    minInterval: 0
+  - id: Butsukekko_Hit
+    clip: {fileID: 8300000, guid: 8bee23341e4be2f45bcf48ec01c94fdb, type: 3}
+    category: 1
+    sceneLabel: "\u307F\u3093\u306A\u3067\u3076\u3064\u3051\u3063\u3053"
+    usageLabel: "\u30DC\u30FC\u30EB\u547D\u4E2D"
+    volume: 1
+    pitch: 1
+    loop: 0
+    loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
+    randomizePitch: 1
+    randomPitchRange: 0.05
+    minInterval: 0.05
+  - id: Butsukekko_Score
+    clip: {fileID: 8300000, guid: cc8a896eba0febd478d26dd3a60c3f3c, type: 3}
+    category: 1
+    sceneLabel: "\u307F\u3093\u306A\u3067\u3076\u3064\u3051\u3063\u3053"
+    usageLabel: "\u5F97\u70B9"
+    volume: 0.8
+    pitch: 1
+    loop: 0
+    loopFadeSeconds: 0
+    fadeInSeconds: 0
+    fadeOutSeconds: 0
+    randomizePitch: 0
+    randomPitchRange: 0.05
+    minInterval: 0.05
